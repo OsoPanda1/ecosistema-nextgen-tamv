@@ -13,7 +13,7 @@ Un marketplace único que conecta **4 lados fundamentales**:
 1. **Usuarios Finales (B2C)** - Consumidores de experiencias XR
 2. **Creadores XR** - Artistas, desarrolladores, educadores
 3. **Instituciones/Empresas (B2B)** - Corporaciones, gobiernos, universidades
-4. **IA/Infraestructura** - Isabella, DreamSpaces, servicios autónomos
+4. **IA/Infraestructura** - Isabella (IA ética con 4 aplicaciones funcionales), DreamSpaces, servicios autónomos
 
 ---
 
@@ -75,8 +75,8 @@ const TAMVPods = {
     endpoints: ['/spaces', '/physics', '/events', '/multiplayer']
   },
   'isabella-ai': {
-    function: 'IA ética, moderación, tutorías, asistencia',
-    endpoints: ['/ai-chat', '/moderation', '/tutoring', '/ethics']
+    function: 'IA ética con 4 aplicaciones: Study Helper, Pen2PDF, Chat, Spatial AI',
+    endpoints: ['/ai-chat', '/study-helper', '/pen2pdf', '/spatial-ai', '/moderation', '/tutoring', '/ethics']
   },
   'utamv-education': {
     function: 'Cursos, certificaciones, programas corporativos',
@@ -139,7 +139,7 @@ class AnubisAntiScraping:
 - **Web/App**: UX tipo Telegram + OnlyFans + Sketchfab, estética Crystal-néon TAMV
 - **XR Nativo**: DreamSpaces consumen assets sin fricción
 - **Overlays Inteligentes**: Precios, licencias, compras in-scene
-- **Isabella Avatar**: Asistente IA hiperrealista integrada
+- **Isabella Avatar**: Asistente IA hiperrealista con 4 aplicaciones funcionales (Study Helper, Pen2PDF, Chat, Spatial AI)
 
 #### **DreamSpaces Monetizados (8 Mundos):**
 ```yaml
@@ -332,7 +332,7 @@ Requisitos Adicionales:
 
 ### **2. Tecnología Revolucionaria**
 - Motor XR/4D nativo con física cuántica
-- IA ética explicable (Isabella)
+- IA ética explicable (Isabella con 4 aplicaciones: Study Helper, Pen2PDF, Chat, Spatial AI)
 - Graph-aware recommendations
 - Blockchain MSR antifraude
 
