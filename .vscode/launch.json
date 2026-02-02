@@ -1,0 +1,33 @@
+{
+    // TAMV CGIFTS Debug Configurations
+    // Configuraciones optimizadas para debugging del ecosistema TAMV
+    "version": "0.2.0",
+    "configurations": [
+        
+
+
+        {
+            "name": "Launch Program",
+            "program": "${workspaceFolder}/app.js",
+            "request": "launch",
+            "skipFiles": [
+                "<node_internals>/**"
+            ],
+            "type": "node"
+        },
+
+        {
+            "name": "TAMV CGIFTS - Chrome Debug",
+            "type": "chrome",
+            "request": "launch",
+            "url": "http://localhost:3001",
+            "webRoot": "${workspaceFolder}/TAMV-COMPLETE-PROJECT",
+            "sourceMaps": true,
+            "trace": true,
+            "userDataDir": "${workspaceFolder}/.vscode/chrome-debug-profile",
+            "runtimeArgs": [
+                "--disable-web-security",
+                "--disable-features=VizDisplayCompositor",
+                "--enable-webxr",
+                "--enable-features=WebXR"
+ 
