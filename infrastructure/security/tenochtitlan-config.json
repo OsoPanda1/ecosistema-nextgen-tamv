@@ -1,0 +1,211 @@
+{
+  "tenochtitlan_system": {
+    "version": "1.0",
+    "classification": "DEFENSIVE_ARCHITECTURE_ADVANCED",
+    "operational_status": "ACTIVE",
+    "last_updated": "2026-01-31T00:00:00Z",
+    
+    "security_principles": {
+      "no_mass_surveillance": {
+        "enabled": true,
+        "verification_method": "consent_ledger_audit",
+        "compliance_status": "VERIFIED"
+      },
+      "no_automatic_offense": {
+        "enabled": true,
+        "verification_method": "code_audit_defensive_only",
+        "compliance_status": "VERIFIED"
+      },
+      "no_sovereign_ai": {
+        "enabled": true,
+        "verification_method": "human_oversight_mandatory",
+        "compliance_status": "VERIFIED"
+      },
+      "no_punishment_without_review": {
+        "enabled": true,
+        "verification_method": "human_review_queue_mandatory",
+        "compliance_status": "VERIFIED"
+      },
+      "international_legal_cooperation": {
+        "enabled": true,
+        "verification_method": "compliance_framework_active",
+        "compliance_status": "VERIFIED"
+      },
+      "permanent_audit": {
+        "enabled": true,
+        "verification_method": "bookpi_immutable_logging",
+        "compliance_status": "VERIFIED"
+      },
+      "human_rights_first": {
+        "enabled": true,
+        "verification_method": "dignity_checks_all_systems",
+        "compliance_status": "VERIFIED"
+      }
+    },
+    
+    "system_components": {
+      "anubis_centinel": {
+        "role": "primary_security_active",
+        "status": "ACTIVE",
+        "encrypted_layers": 4,
+        "organizational_levels": 4,
+        "auto_escalation_disabled": true,
+        "capabilities": [
+          "cryptographic_identity_verification",
+          "traffic_behavioral_analysis", 
+          "purpose_based_access_control",
+          "immutable_evidence_registry"
+        ]
+      },
+      
+      "horus_centinel": {
+        "role": "evolutionary_standby",
+        "status": "STANDBY",
+        "encrypted_layers": 6,
+        "cognitive_obfuscation_layers": 2,
+        "total_isolation_layers": 2,
+        "inherits_anubis_weaknesses": false,
+        "activation_requires_human_approval": true
+      },
+      
+      "dekateotl": {
+        "role": "supreme_orchestration",
+        "status": "ACTIVE",
+        "encrypted_layers": 11,
+        "never_acts_alone": true,
+        "requires": [
+          "human_guardian_approval",
+          "legal_justification",
+          "audit_trail_complete",
+          "consensus_minimum",
+          "ethical_verification"
+        ]
+      },
+      
+      "aztek_gods": {
+        "role": "absolute_standby_continuity",
+        "status": "DEEP_STANDBY",
+        "encrypted_layers": 22,
+        "architecture_type": "quantum_resistant",
+        "activation_conditions": {
+          "dekateotl_failure": false,
+          "guardian_authorization": false,
+          "extreme_event_validated": false
+        },
+        "prevents": [
+          "single_point_failure",
+          "system_capture",
+          "total_collapse"
+        ]
+      }
+    },
+    
+    "specialized_radars": {
+      "quetzalcoatl_antifraud": {
+        "detects": [
+          "money_laundering",
+          "economic_manipulation",
+          "abuse_patterns",
+          "emerging_threats"
+        ],
+        "technologies": [
+          "multi_cell_correlation",
+          "weak_signal_analysis",
+          "temporal_pattern_analysis"
+        ],
+        "status": "ACTIVE"
+      },
+      
+      "ojo_de_ra_illegal_content": {
+        "detects": [
+          "verified_abuse",
+          "exploitation",
+          "illegal_violence",
+          "prohibited_activities"
+        ],
+        "does_not_censor": "ideas_or_opinions",
+        "acts_only_on": "verifiable_illegality",
+        "human_verification_required": true,
+        "status": "ACTIVE"
+      },
+      
+      "mos_twin_radars": {
+        "mos_a": {
+          "mode": "validate",
+          "status": "ACTIVE"
+        },
+        "mos_b": {
+          "mode": "question", 
+          "status": "ACTIVE"
+        },
+        "consensus_required": true,
+        "no_consensus_action": "human_review_mandatory"
+      }
+    },
+    
+    "guardian_oversight": {
+      "technical_guardians": {
+        "count": 3,
+        "responsibilities": ["system_monitoring", "technical_decisions"],
+        "ai_override_authority": false
+      },
+      "ethical_guardians": {
+        "count": 3,
+        "responsibilities": ["principle_verification", "ethical_decisions"],
+        "ai_override_authority": false
+      },
+      "legal_guardians": {
+        "count": 3,
+        "responsibilities": ["compliance_monitoring", "legal_decisions"],
+        "ai_override_authority": false
+      },
+      "economic_guardians": {
+        "count": 3,
+        "responsibilities": ["financial_integrity", "economic_decisions"],
+        "ai_override_authority": false
+      },
+      "consensus_requirement": "60_percent_minimum",
+      "human_final_authority": true
+    },
+    
+    "honeypod_labyrinth": {
+      "tenochtitlan_honeypods": {
+        "dynamic_layers": true,
+        "potentially_infinite": true,
+        "generation_methods": [
+          "combinatorial",
+          "random_controlled", 
+          "adaptive_evolution"
+        ],
+        "attacker_never_touches_real_systems": true,
+        "resource_consumption_progressive": true,
+        "fake_success_scenarios": true
+      }
+    },
+    
+    "operational_metrics": {
+      "detection_time": "< 1 second",
+      "response_time": "< 5 seconds", 
+      "false_positives": "< 0.1%",
+      "threat_coverage": "99.9%",
+      "availability": "100% (critical)",
+      "human_oversight_coverage": "100%"
+    },
+    
+    "legal_compliance": {
+      "gdpr": "COMPLIANT",
+      "ccpa": "COMPLIANT", 
+      "lgpd": "COMPLIANT",
+      "lfpdppp": "COMPLIANT",
+      "international_cooperation": "ACTIVE",
+      "audit_trail": "IMMUTABLE_BOOKPI"
+    },
+    
+    "canonical_statement": {
+      "english": "TAMV does not defend by attacking. It defends by being impossible to capture. Every system is replaceable. Every power is limited. Every decision is auditable. Security exists to protect humans, not to dominate them.",
+      "spanish": "TAMV no se defiende atacando. Se defiende siendo imposible de capturar. Cada sistema es reemplazable. Cada poder está limitado. Cada decisión es auditable. La seguridad existe para proteger humanos, no para dominarlos.",
+      "legal_weight": "CONSTITUTIONAL",
+      "immutable": true
+    }
+  }
+}

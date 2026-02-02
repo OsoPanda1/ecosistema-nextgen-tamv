@@ -1,0 +1,476 @@
+name: TAMV Production Deployment
+
+on:
+  push:
+    branches: [main, production]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Deployment environment'
+        required: true
+        default: 'production'
+        type: choice
+        options:
+        - production
+        - staging
+        - development
+
+env:
+  AWS_REGION: us-west-2
+  ECR_REGISTRY: ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.us-west-2.amazonaws.com
+  CLUSTER_NAME: tamv-production
+
+jobs:
+  # Security and Quality Checks
+  security-scan:
+    name: Security Scan
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Run Trivy vulnerability scanner
+      uses: aquasecurity/trivy-action@master
+      with:
+        scan-type: 'fs'
+        scan-ref: '.'
+        format: 'sarif'
+        output: 'trivy-results.sarif'
+
+    - name: Upload Trivy scan results
+      uses: github/codeql-action/upload-sarif@v2
+      with:
+        sarif_file: 'trivy-results.sarif'
+
+    - name: Run CodeQL Analysis
+      uses: github/codeql-action/analyze@v2
+      with:
+        languages: javascript, python
+
+  # Code Quality and Testing
+  quality-check:
+    name: Code Quality Check
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+
+    - name: Setup Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+
+    - name: Install dependencies
+      run: |
+        npm ci
+        pip install -r requirements.txt
+
+    - name: Run ESLint
+      run: npm run lint
+
+    - name: Run Python linting
+      run: |
+        pip install flake8 black
+        flake8 src/
+        black --check src/
+
+    - name: Run unit tests
+      run: |
+        npm test
+        python -m pytest tests/
+
+    - name: Generate test coverage
+      run: |
+        npm run test:coverage
+        python -m pytest --cov=src tests/
+
+    - name: Upload coverage to Codecov
+      uses: codecov/codecov-action@v3
+
+  # Build and Push Docker Images
+  build-images:
+    name: Build Docker Images
+    runs-on: ubuntu-latest
+    needs: [security-scan, quality-check]
+    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/production'
+    outputs:
+      image-tag: ${{ steps.meta.outputs.tags }}
+      image-digest: ${{ steps.build.outputs.digest }}
+    strategy:
+      matrix:
+        service:
+          - tamv-core-api
+          - tamv-xr-renderer
+          - tamv-quantum-processor
+          - tamv-isabella-ai
+          - tamv-blockchain-service
+          - tamv-tenochtitlan-security
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: ${{ env.AWS_REGION }}
+
+    - name: Login to Amazon ECR
+      id: login-ecr
+      uses: aws-actions/amazon-ecr-login@v2
+
+    - name: Extract metadata
+      id: meta
+      uses: docker/metadata-action@v5
+      with:
+        images: ${{ env.ECR_REGISTRY }}/${{ matrix.service }}
+        tags: |
+          type=ref,event=branch
+          type=ref,event=pr
+          type=sha,prefix={{branch}}-
+          type=raw,value=latest,enable={{is_default_branch}}
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+
+    - name: Build and push Docker image
+      id: build
+      uses: docker/build-push-action@v5
+      with:
+        context: .
+        file: ./docker/${{ matrix.service }}/Dockerfile
+        push: true
+        tags: ${{ steps.meta.outputs.tags }}
+        labels: ${{ steps.meta.outputs.labels }}
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
+        platforms: linux/amd64,linux/arm64
+
+    - name: Sign container image
+      run: |
+        echo "Signing container image..."
+        # Add container signing logic here if needed
+
+  # Infrastructure Deployment
+  deploy-infrastructure:
+    name: Deploy Infrastructure
+    runs-on: ubuntu-latest
+    needs: [build-images]
+    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/production'
+    environment: 
+      name: ${{ github.ref == 'refs/heads/production' && 'production' || 'staging' }}
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: ${{ env.AWS_REGION }}
+
+    - name: Setup Terraform
+      uses: hashicorp/setup-terraform@v3
+      with:
+        terraform_version: 1.6.0
+
+    - name: Terraform Init
+      working-directory: ./infrastructure/terraform
+      run: |
+        terraform init \
+          -backend-config="bucket=tamv-terraform-state-${{ env.AWS_REGION }}" \
+          -backend-config="key=tamv/${{ github.ref == 'refs/heads/production' && 'production' || 'staging' }}/terraform.tfstate" \
+          -backend-config="region=${{ env.AWS_REGION }}"
+
+    - name: Terraform Plan
+      working-directory: ./infrastructure/terraform
+      run: |
+        terraform plan \
+          -var="environment=${{ github.ref == 'refs/heads/production' && 'production' || 'staging' }}" \
+          -var="aws_region=${{ env.AWS_REGION }}" \
+          -var="cluster_name=${{ env.CLUSTER_NAME }}" \
+          -out=tfplan
+
+    - name: Terraform Apply
+      working-directory: ./infrastructure/terraform
+      run: terraform apply tfplan
+
+    - name: Update kubeconfig
+      run: |
+        aws eks update-kubeconfig --region ${{ env.AWS_REGION }} --name ${{ env.CLUSTER_NAME }}
+
+  # Application Deployment
+  deploy-applications:
+    name: Deploy Applications
+    runs-on: ubuntu-latest
+    needs: [deploy-infrastructure]
+    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/production'
+    environment: 
+      name: ${{ github.ref == 'refs/heads/production' && 'production' || 'staging' }}
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: ${{ env.AWS_REGION }}
+
+    - name: Update kubeconfig
+      run: |
+        aws eks update-kubeconfig --region ${{ env.AWS_REGION }} --name ${{ env.CLUSTER_NAME }}
+
+    - name: Install Istio
+      run: |
+        curl -L https://istio.io/downloadIstio | sh -
+        export PATH="$PWD/istio-*/bin:$PATH"
+        istioctl install --set values.defaultRevision=default -y
+        kubectl label namespace tamv-${{ github.ref == 'refs/heads/production' && 'production' || 'staging' }} istio-injection=enabled --overwrite
+
+    - name: Deploy Istio configuration
+      run: |
+        kubectl apply -f infrastructure/istio/tamv-service-mesh.yaml
+
+    - name: Deploy monitoring stack
+      run: |
+        helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
+        helm repo add grafana https://grafana.github.io/helm-charts
+        helm repo update
+        
+        kubectl create namespace monitoring --dry-run=client -o yaml | kubectl apply -f -
+        
+        helm upgrade --install prometheus prometheus-community/kube-prometheus-stack \
+          --namespace monitoring \
+          --set prometheus.prometheusSpec.serviceMonitorSelectorNilUsesHelmValues=false \
+          --set prometheus.prometheusSpec.retention=30d \
+          --set grafana.adminPassword=${{ secrets.GRAFANA_ADMIN_PASSWORD }} \
+          --wait
+
+    - name: Deploy TAMV applications
+      run: |
+        kubectl create namespace tamv-${{ github.ref == 'refs/heads/production' && 'production' || 'staging' }} --dry-run=client -o yaml | kubectl apply -f -
+        kubectl apply -f infrastructure/kubernetes/tamv-core-deployment.yaml
+
+    - name: Wait for deployments
+      run: |
+        deployments=("tamv-core-api" "tamv-xr-renderer" "tamv-quantum-processor" "tamv-isabella-ai" "tamv-blockchain-service" "tamv-tenochtitlan-security")
+        for deployment in "${deployments[@]}"; do
+          kubectl rollout status deployment/$deployment -n tamv-${{ github.ref == 'refs/heads/production' && 'production' || 'staging' }} --timeout=600s
+        done
+
+  # Integration Tests
+  integration-tests:
+    name: Integration Tests
+    runs-on: ubuntu-latest
+    needs: [deploy-applications]
+    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/production'
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: ${{ env.AWS_REGION }}
+
+    - name: Update kubeconfig
+      run: |
+        aws eks update-kubeconfig --region ${{ env.AWS_REGION }} --name ${{ env.CLUSTER_NAME }}
+
+    - name: Setup Node.js for tests
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+
+    - name: Install test dependencies
+      run: |
+        npm install -g newman
+        npm install
+
+    - name: Get Gateway IP
+      id: gateway
+      run: |
+        GATEWAY_IP=$(kubectl get svc istio-ingressgateway -n istio-system -o jsonpath='{.status.loadBalancer.ingress[0].ip}')
+        echo "gateway-ip=$GATEWAY_IP" >> $GITHUB_OUTPUT
+
+    - name: Run API tests
+      run: |
+        # Wait for services to be ready
+        sleep 60
+        
+        # Test core API health
+        curl -f http://${{ steps.gateway.outputs.gateway-ip }}/health || exit 1
+        
+        # Run Postman collection tests
+        newman run tests/postman/tamv-api-tests.json \
+          --env-var "base_url=http://${{ steps.gateway.outputs.gateway-ip }}" \
+          --reporters cli,json \
+          --reporter-json-export test-results.json
+
+    - name: Run XR performance tests
+      run: |
+        # Test XR renderer endpoints
+        curl -f http://${{ steps.gateway.outputs.gateway-ip }}/xr/health || exit 1
+
+    - name: Run security tests
+      run: |
+        # Test security endpoints
+        curl -f http://${{ steps.gateway.outputs.gateway-ip }}/security/health || exit 1
+
+    - name: Upload test results
+      uses: actions/upload-artifact@v3
+      if: always()
+      with:
+        name: test-results
+        path: test-results.json
+
+  # Performance Tests
+  performance-tests:
+    name: Performance Tests
+    runs-on: ubuntu-latest
+    needs: [deploy-applications]
+    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/production'
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: ${{ env.AWS_REGION }}
+
+    - name: Update kubeconfig
+      run: |
+        aws eks update-kubeconfig --region ${{ env.AWS_REGION }} --name ${{ env.CLUSTER_NAME }}
+
+    - name: Install k6
+      run: |
+        sudo gpg -k
+        sudo gpg --no-default-keyring --keyring /usr/share/keyrings/k6-archive-keyring.gpg --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys C5AD17C747E3415A3642D57D77C6C491D6AC1D69
+        echo "deb [signed-by=/usr/share/keyrings/k6-archive-keyring.gpg] https://dl.k6.io/deb stable main" | sudo tee /etc/apt/sources.list.d/k6.list
+        sudo apt-get update
+        sudo apt-get install k6
+
+    - name: Get Gateway IP
+      id: gateway
+      run: |
+        GATEWAY_IP=$(kubectl get svc istio-ingressgateway -n istio-system -o jsonpath='{.status.loadBalancer.ingress[0].ip}')
+        echo "gateway-ip=$GATEWAY_IP" >> $GITHUB_OUTPUT
+
+    - name: Run load tests
+      run: |
+        k6 run tests/performance/load-test.js \
+          --env BASE_URL=http://${{ steps.gateway.outputs.gateway-ip }} \
+          --out json=load-test-results.json
+
+    - name: Upload performance results
+      uses: actions/upload-artifact@v3
+      with:
+        name: performance-results
+        path: load-test-results.json
+
+  # Security Compliance Check
+  compliance-check:
+    name: Security Compliance
+    runs-on: ubuntu-latest
+    needs: [deploy-applications]
+    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/production'
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: ${{ env.AWS_REGION }}
+
+    - name: Update kubeconfig
+      run: |
+        aws eks update-kubeconfig --region ${{ env.AWS_REGION }} --name ${{ env.CLUSTER_NAME }}
+
+    - name: Run CIS Kubernetes Benchmark
+      run: |
+        kubectl apply -f https://raw.githubusercontent.com/aquasecurity/kube-bench/main/job.yaml
+        kubectl wait --for=condition=complete job/kube-bench --timeout=300s
+        kubectl logs job/kube-bench > cis-benchmark-results.txt
+
+    - name: Run Falco security monitoring
+      run: |
+        helm repo add falcosecurity https://falcosecurity.github.io/charts
+        helm repo update
+        helm install falco falcosecurity/falco --namespace falco --create-namespace
+
+    - name: Upload compliance results
+      uses: actions/upload-artifact@v3
+      with:
+        name: compliance-results
+        path: cis-benchmark-results.txt
+
+  # Notification
+  notify:
+    name: Notify Deployment Status
+    runs-on: ubuntu-latest
+    needs: [integration-tests, performance-tests, compliance-check]
+    if: always()
+    steps:
+    - name: Notify Slack
+      uses: 8398a7/action-slack@v3
+      with:
+        status: ${{ job.status }}
+        channel: '#tamv-deployments'
+        webhook_url: ${{ secrets.SLACK_WEBHOOK }}
+        fields: repo,message,commit,author,action,eventName,ref,workflow
+      env:
+        SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK }}
+
+    - name: Notify Teams
+      uses: skitionek/notify-microsoft-teams@master
+      if: always()
+      with:
+        webhook_url: ${{ secrets.TEAMS_WEBHOOK }}
+        needs: ${{ toJson(needs) }}
+        job: ${{ toJson(job) }}
+        steps: ${{ toJson(steps) }}
+
+# Cleanup job for failed deployments
+  cleanup-on-failure:
+    name: Cleanup on Failure
+    runs-on: ubuntu-latest
+    needs: [deploy-applications]
+    if: failure()
+    steps:
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: ${{ env.AWS_REGION }}
+
+    - name: Update kubeconfig
+      run: |
+        aws eks update-kubeconfig --region ${{ env.AWS_REGION }} --name ${{ env.CLUSTER_NAME }}
+
+    - name: Rollback deployments
+      run: |
+        deployments=("tamv-core-api" "tamv-xr-renderer" "tamv-quantum-processor" "tamv-isabella-ai" "tamv-blockchain-service" "tamv-tenochtitlan-security")
+        for deployment in "${deployments[@]}"; do
+          kubectl rollout undo deployment/$deployment -n tamv-${{ github.ref == 'refs/heads/production' && 'production' || 'staging' }} || true
+        done

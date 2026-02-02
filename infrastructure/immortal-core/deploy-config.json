@@ -1,0 +1,133 @@
+{
+  "tamv_immortal_core": {
+    "version": "1.1",
+    "project_id": "ba83bda3-ee5e-45d4-a557-c9bf0f516e82",
+    "deployment": {
+      "type": "post_deployment_autonomous_bootstrap",
+      "auto_execute": true,
+      "rollback_enabled": true,
+      "audit_required": true
+    },
+    "security_layers": {
+      "layer_1_forensic": {
+        "audit_log": true,
+        "ritual_documentation": true,
+        "immutable_registry": true
+      },
+      "layer_2_environment": {
+        "env_gitignore_enforced": true,
+        "log_redaction": true,
+        "secrets_rotation": {
+          "enabled": true,
+          "min_days": 30
+        }
+      },
+      "layer_3_structural": {
+        "zero_trust": true,
+        "rls_enforced": true,
+        "security_middleware": true,
+        "import_validation": true
+      },
+      "layer_4_authentication": {
+        "mfa_required_admins": true,
+        "min_password_length": 14,
+        "pwned_password_check": true,
+        "leaked_password_protection": true
+      },
+      "layer_5_xr_audit": {
+        "hyperrealism_check": true,
+        "min_quality_score": 0.90,
+        "continuous_validation": true
+      },
+      "layer_6_cognitive": {
+        "ai_orchestration": true,
+        "agent_supervision": "Isabela",
+        "service_coordination": true
+      },
+      "layer_7_public": {
+        "social_expansion": true,
+        "autonomous_publication": true,
+        "platform_integration": true
+      }
+    },
+    "ai_agents": {
+      "isabela": {
+        "role": "primary_orchestrator",
+        "status": "active",
+        "permissions": [
+          "chat.read", "chat.write",
+          "media.upload.image", "media.upload.video",
+          "xr.upload", "xr.validate",
+          "docs.3d.read", "docs.3d.write",
+          "guild.create", "guild.manage", "guild.moderate",
+          "blockchain.anchor", "system.publish",
+          "social.integrations.manage"
+        ],
+        "services_controlled": [
+          "Anubis Sentinel", "Horus Sentinel", "Kateot",
+          "Aztec God", "Tenochtitlan", "Atlas DigyTAMV"
+        ]
+      }
+    },
+    "system_services": {
+      "anubis_sentinel": {
+        "category": "security",
+        "status": "active",
+        "function": "Authentication and access control"
+      },
+      "horus_sentinel": {
+        "category": "monitoring",
+        "status": "active",
+        "function": "System monitoring and alerting"
+      },
+      "kateot": {
+        "category": "orchestration",
+        "status": "active",
+        "function": "Service orchestration"
+      },
+      "aztec_god": {
+        "category": "strategy",
+        "status": "active",
+        "function": "Strategic decision making"
+      },
+      "tenochtitlan": {
+        "category": "protection_core",
+        "status": "active",
+        "function": "Global protection layer"
+      },
+      "atlas_digytamv": {
+        "category": "knowledge_core",
+        "status": "active",
+        "function": "Knowledge management and retrieval"
+      }
+    },
+    "social_platforms": {
+      "x": { "status": "pending_setup", "priority": 1 },
+      "instagram": { "status": "pending_setup", "priority": 2 },
+      "linkedin": { "status": "pending_setup", "priority": 3 },
+      "tiktok": { "status": "pending_setup", "priority": 4 },
+      "youtube": { "status": "pending_setup", "priority": 5 }
+    },
+    "blockchain_registry": {
+      "ethereum": { "status": "active", "purpose": "main_contracts" },
+      "polygon": { "status": "active", "purpose": "scalability" },
+      "solana": { "status": "active", "purpose": "high_speed_transactions" }
+    },
+    "publication_protocol": {
+      "project": "TAM",
+      "objective": "create_social_presence",
+      "content_mode": "introductory",
+      "tone": "professional_innovative",
+      "cta": "invite_users_to_platform",
+      "agent_responsible": "Isabela"
+    },
+    "civilizational_principles": {
+      "antifragility": "System strengthens with attacks",
+      "sovereignty": "Digital autonomy preserved",
+      "memory": "Historical record immutable",
+      "dignity": "Technology serves human dignity",
+      "transparency": "All actions auditable",
+      "federation": "Autonomous cooperation"
+    }
+  }
+}

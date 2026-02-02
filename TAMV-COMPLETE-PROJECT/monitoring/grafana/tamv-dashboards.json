@@ -1,0 +1,702 @@
+{
+  "dashboard": {
+    "id": null,
+    "title": "TAMV Production Monitoring",
+    "tags": ["tamv", "production", "monitoring"],
+    "style": "dark",
+    "timezone": "browser",
+    "refresh": "30s",
+    "schemaVersion": 30,
+    "version": 1,
+    "time": {
+      "from": "now-1h",
+      "to": "now"
+    },
+    "timepicker": {
+      "refresh_intervals": ["5s", "10s", "30s", "1m", "5m", "15m", "30m", "1h", "2h", "1d"]
+    },
+    "templating": {
+      "list": [
+        {
+          "name": "environment",
+          "type": "custom",
+          "options": [
+            {"text": "Production", "value": "production", "selected": true},
+            {"text": "Staging", "value": "staging", "selected": false},
+            {"text": "Development", "value": "development", "selected": false}
+          ]
+        },
+        {
+          "name": "service",
+          "type": "custom",
+          "options": [
+            {"text": "All", "value": ".*", "selected": true},
+            {"text": "Core API", "value": "tamv-core-api", "selected": false},
+            {"text": "XR Renderer", "value": "tamv-xr-renderer", "selected": false},
+            {"text": "Quantum Processor", "value": "tamv-quantum-processor", "selected": false},
+            {"text": "Isabella AI", "value": "tamv-isabella-ai", "selected": false},
+            {"text": "Blockchain Service", "value": "tamv-blockchain-service", "selected": false},
+            {"text": "Security Service", "value": "tamv-tenochtitlan-security", "selected": false}
+          ]
+        }
+      ]
+    },
+    "panels": [
+      {
+        "id": 1,
+        "title": "TAMV System Overview",
+        "type": "stat",
+        "gridPos": {"h": 8, "w": 24, "x": 0, "y": 0},
+        "targets": [
+          {
+            "expr": "up{job=~\"tamv.*\"}",
+            "legendFormat": "Services Up",
+            "refId": "A"
+          },
+          {
+            "expr": "sum(rate(http_requests_total{job=~\"tamv.*\"}[5m]))",
+            "legendFormat": "Requests/sec",
+            "refId": "B"
+          },
+          {
+            "expr": "avg(http_request_duration_seconds{job=~\"tamv.*\", quantile=\"0.95\"})",
+            "legendFormat": "95th Percentile Latency",
+            "refId": "C"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "color": {"mode": "palette-classic"},
+            "custom": {
+              "displayMode": "list",
+              "orientation": "horizontal"
+            },
+            "mappings": [],
+            "thresholds": {
+              "steps": [
+                {"color": "green", "value": null},
+                {"color": "red", "value": 80}
+              ]
+            }
+          }
+        },
+        "options": {
+          "reduceOptions": {
+            "values": false,
+            "calcs": ["lastNotNull"],
+            "fields": ""
+          },
+          "orientation": "auto",
+          "textMode": "auto",
+          "colorMode": "value",
+          "graphMode": "area",
+          "justifyMode": "auto"
+        }
+      },
+      {
+        "id": 2,
+        "title": "Service Health Status",
+        "type": "table",
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 8},
+        "targets": [
+          {
+            "expr": "up{job=~\"tamv.*\"}",
+            "format": "table",
+            "instant": true,
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "custom": {
+              "align": "auto",
+              "displayMode": "color-background"
+            },
+            "mappings": [
+              {
+                "options": {
+                  "0": {"text": "Down", "color": "red"},
+                  "1": {"text": "Up", "color": "green"}
+                },
+                "type": "value"
+              }
+            ],
+            "thresholds": {
+              "steps": [
+                {"color": "red", "value": 0},
+                {"color": "green", "value": 1}
+              ]
+            }
+          }
+        },
+        "options": {
+          "showHeader": true
+        },
+        "transformations": [
+          {
+            "id": "organize",
+            "options": {
+              "excludeByName": {"Time": true, "__name__": true},
+              "indexByName": {},
+              "renameByName": {
+                "instance": "Instance",
+                "job": "Service",
+                "Value": "Status"
+              }
+            }
+          }
+        ]
+      },
+      {
+        "id": 3,
+        "title": "XR/VR Performance Metrics",
+        "type": "graph",
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 8},
+        "targets": [
+          {
+            "expr": "rate(xr_frames_rendered_total{job=\"tamv-xr-renderer\"}[5m])",
+            "legendFormat": "FPS - {{instance}}",
+            "refId": "A"
+          },
+          {
+            "expr": "xr_concurrent_users{job=\"tamv-xr-renderer\"}",
+            "legendFormat": "Concurrent Users - {{instance}}",
+            "refId": "B"
+          },
+          {
+            "expr": "xr_render_latency_seconds{job=\"tamv-xr-renderer\", quantile=\"0.95\"}",
+            "legendFormat": "95th Percentile Latency - {{instance}}",
+            "refId": "C"
+          }
+        ],
+        "yAxes": [
+          {
+            "label": "FPS / Users",
+            "min": 0
+          },
+          {
+            "label": "Latency (seconds)",
+            "min": 0
+          }
+        ],
+        "legend": {
+          "avg": false,
+          "current": false,
+          "max": false,
+          "min": false,
+          "show": true,
+          "total": false,
+          "values": false
+        },
+        "lines": true,
+        "linewidth": 1,
+        "nullPointMode": "null",
+        "options": {
+          "alertThreshold": true
+        },
+        "percentage": false,
+        "pointradius": 2,
+        "points": false,
+        "renderer": "flot",
+        "seriesOverrides": [],
+        "spaceLength": 10,
+        "stack": false,
+        "steppedLine": false,
+        "thresholds": [],
+        "timeRegions": [],
+        "tooltip": {
+          "shared": true,
+          "sort": 0,
+          "value_type": "individual"
+        },
+        "xAxis": {
+          "buckets": null,
+          "mode": "time",
+          "name": null,
+          "show": true,
+          "values": []
+        }
+      },
+      {
+        "id": 4,
+        "title": "Quantum Processing Load",
+        "type": "graph",
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 16},
+        "targets": [
+          {
+            "expr": "quantum_processor_utilization{job=\"tamv-quantum-processor\"}",
+            "legendFormat": "CPU Utilization % - {{instance}}",
+            "refId": "A"
+          },
+          {
+            "expr": "quantum_qubits_in_use{job=\"tamv-quantum-processor\"}",
+            "legendFormat": "Qubits in Use - {{instance}}",
+            "refId": "B"
+          },
+          {
+            "expr": "rate(quantum_operations_total{job=\"tamv-quantum-processor\"}[5m])",
+            "legendFormat": "Operations/sec - {{instance}}",
+            "refId": "C"
+          }
+        ],
+        "yAxes": [
+          {
+            "label": "Utilization %",
+            "max": 100,
+            "min": 0
+          },
+          {
+            "label": "Qubits / Ops/sec",
+            "min": 0
+          }
+        ],
+        "alert": {
+          "conditions": [
+            {
+              "evaluator": {
+                "params": [80],
+                "type": "gt"
+              },
+              "operator": {
+                "type": "and"
+              },
+              "query": {
+                "params": ["A", "5m", "now"]
+              },
+              "reducer": {
+                "params": [],
+                "type": "avg"
+              },
+              "type": "query"
+            }
+          ],
+          "executionErrorState": "alerting",
+          "for": "5m",
+          "frequency": "10s",
+          "handler": 1,
+          "name": "Quantum Processor High Load",
+          "noDataState": "no_data",
+          "notifications": []
+        }
+      },
+      {
+        "id": 5,
+        "title": "Isabella AI Performance",
+        "type": "graph",
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 16},
+        "targets": [
+          {
+            "expr": "rate(isabella_requests_total{job=\"tamv-isabella-ai\"}[5m])",
+            "legendFormat": "Requests/sec - {{instance}}",
+            "refId": "A"
+          },
+          {
+            "expr": "isabella_ethical_score_avg{job=\"tamv-isabella-ai\"}",
+            "legendFormat": "Avg Ethical Score - {{instance}}",
+            "refId": "B"
+          },
+          {
+            "expr": "isabella_confidence_avg{job=\"tamv-isabella-ai\"}",
+            "legendFormat": "Avg Confidence - {{instance}}",
+            "refId": "C"
+          },
+          {
+            "expr": "isabella_human_reviews_pending{job=\"tamv-isabella-ai\"}",
+            "legendFormat": "Pending Human Reviews - {{instance}}",
+            "refId": "D"
+          }
+        ],
+        "yAxes": [
+          {
+            "label": "Requests/sec",
+            "min": 0
+          },
+          {
+            "label": "Score / Reviews",
+            "max": 1,
+            "min": 0
+          }
+        ]
+      },
+      {
+        "id": 6,
+        "title": "Blockchain MSR Metrics",
+        "type": "graph",
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 24},
+        "targets": [
+          {
+            "expr": "blockchain_blocks_total{job=\"tamv-blockchain-service\"}",
+            "legendFormat": "Total Blocks - {{instance}}",
+            "refId": "A"
+          },
+          {
+            "expr": "rate(blockchain_transactions_total{job=\"tamv-blockchain-service\"}[5m])",
+            "legendFormat": "Transactions/sec - {{instance}}",
+            "refId": "B"
+          },
+          {
+            "expr": "blockchain_pending_transactions{job=\"tamv-blockchain-service\"}",
+            "legendFormat": "Pending Transactions - {{instance}}",
+            "refId": "C"
+          },
+          {
+            "expr": "blockchain_state_size_bytes{job=\"tamv-blockchain-service\"}",
+            "legendFormat": "State Size (bytes) - {{instance}}",
+            "refId": "D"
+          }
+        ],
+        "yAxes": [
+          {
+            "label": "Count",
+            "min": 0
+          },
+          {
+            "label": "Size (bytes)",
+            "min": 0
+          }
+        ]
+      },
+      {
+        "id": 7,
+        "title": "Security Events (TENOCHTITLAN)",
+        "type": "graph",
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 24},
+        "targets": [
+          {
+            "expr": "rate(security_events_total{job=\"tamv-tenochtitlan-security\"}[5m])",
+            "legendFormat": "Security Events/sec - {{severity}}",
+            "refId": "A"
+          },
+          {
+            "expr": "security_threats_blocked_total{job=\"tamv-tenochtitlan-security\"}",
+            "legendFormat": "Threats Blocked - {{type}}",
+            "refId": "B"
+          },
+          {
+            "expr": "security_false_positives_total{job=\"tamv-tenochtitlan-security\"}",
+            "legendFormat": "False Positives - {{type}}",
+            "refId": "C"
+          }
+        ],
+        "yAxes": [
+          {
+            "label": "Events/sec",
+            "min": 0
+          },
+          {
+            "label": "Count",
+            "min": 0
+          }
+        ],
+        "alert": {
+          "conditions": [
+            {
+              "evaluator": {
+                "params": [10],
+                "type": "gt"
+              },
+              "operator": {
+                "type": "and"
+              },
+              "query": {
+                "params": ["A", "1m", "now"]
+              },
+              "reducer": {
+                "params": [],
+                "type": "avg"
+              },
+              "type": "query"
+            }
+          ],
+          "executionErrorState": "alerting",
+          "for": "1m",
+          "frequency": "10s",
+          "handler": 1,
+          "name": "High Security Event Rate",
+          "noDataState": "no_data",
+          "notifications": []
+        }
+      },
+      {
+        "id": 8,
+        "title": "Resource Utilization",
+        "type": "graph",
+        "gridPos": {"h": 8, "w": 24, "x": 0, "y": 32},
+        "targets": [
+          {
+            "expr": "100 - (avg by (instance) (irate(node_cpu_seconds_total{mode=\"idle\"}[5m])) * 100)",
+            "legendFormat": "CPU Usage % - {{instance}}",
+            "refId": "A"
+          },
+          {
+            "expr": "(1 - (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes)) * 100",
+            "legendFormat": "Memory Usage % - {{instance}}",
+            "refId": "B"
+          },
+          {
+            "expr": "100 - ((node_filesystem_avail_bytes{mountpoint=\"/\"} * 100) / node_filesystem_size_bytes{mountpoint=\"/\"})",
+            "legendFormat": "Disk Usage % - {{instance}}",
+            "refId": "C"
+          },
+          {
+            "expr": "rate(node_network_receive_bytes_total[5m]) * 8",
+            "legendFormat": "Network In (bps) - {{instance}}",
+            "refId": "D"
+          },
+          {
+            "expr": "rate(node_network_transmit_bytes_total[5m]) * 8",
+            "legendFormat": "Network Out (bps) - {{instance}}",
+            "refId": "E"
+          }
+        ],
+        "yAxes": [
+          {
+            "label": "Percentage",
+            "max": 100,
+            "min": 0
+          },
+          {
+            "label": "Bits per second",
+            "min": 0
+          }
+        ]
+      },
+      {
+        "id": 9,
+        "title": "Error Rates by Service",
+        "type": "graph",
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 40},
+        "targets": [
+          {
+            "expr": "rate(http_requests_total{job=~\"tamv.*\", code=~\"5..\"}[5m])",
+            "legendFormat": "5xx Errors/sec - {{job}}",
+            "refId": "A"
+          },
+          {
+            "expr": "rate(http_requests_total{job=~\"tamv.*\", code=~\"4..\"}[5m])",
+            "legendFormat": "4xx Errors/sec - {{job}}",
+            "refId": "B"
+          }
+        ],
+        "yAxes": [
+          {
+            "label": "Errors/sec",
+            "min": 0
+          }
+        ],
+        "alert": {
+          "conditions": [
+            {
+              "evaluator": {
+                "params": [1],
+                "type": "gt"
+              },
+              "operator": {
+                "type": "and"
+              },
+              "query": {
+                "params": ["A", "5m", "now"]
+              },
+              "reducer": {
+                "params": [],
+                "type": "avg"
+              },
+              "type": "query"
+            }
+          ],
+          "executionErrorState": "alerting",
+          "for": "2m",
+          "frequency": "10s",
+          "handler": 1,
+          "name": "High Error Rate",
+          "noDataState": "no_data",
+          "notifications": []
+        }
+      },
+      {
+        "id": 10,
+        "title": "Response Time Distribution",
+        "type": "heatmap",
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 40},
+        "targets": [
+          {
+            "expr": "sum(rate(http_request_duration_seconds_bucket{job=~\"tamv.*\"}[5m])) by (le)",
+            "format": "heatmap",
+            "legendFormat": "{{le}}",
+            "refId": "A"
+          }
+        ],
+        "heatmap": {
+          "xAxis": {
+            "show": true
+          },
+          "yAxis": {
+            "show": true,
+            "logBase": 1,
+            "min": null,
+            "max": null
+          },
+          "yBucketBound": "auto"
+        },
+        "cards": {
+          "cardPadding": null,
+          "cardRound": null
+        },
+        "color": {
+          "cardColor": "#b4ff00",
+          "colorScale": "sqrt",
+          "colorScheme": "interpolateOranges",
+          "exponent": 0.5,
+          "mode": "spectrum"
+        },
+        "legend": {
+          "show": false
+        }
+      },
+      {
+        "id": 11,
+        "title": "Database Performance",
+        "type": "graph",
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 48},
+        "targets": [
+          {
+            "expr": "rate(postgresql_queries_total[5m])",
+            "legendFormat": "Queries/sec - {{datname}}",
+            "refId": "A"
+          },
+          {
+            "expr": "postgresql_connections_active",
+            "legendFormat": "Active Connections - {{datname}}",
+            "refId": "B"
+          },
+          {
+            "expr": "postgresql_query_duration_seconds{quantile=\"0.95\"}",
+            "legendFormat": "95th Percentile Query Time - {{datname}}",
+            "refId": "C"
+          }
+        ],
+        "yAxes": [
+          {
+            "label": "Queries/sec",
+            "min": 0
+          },
+          {
+            "label": "Connections / Time (s)",
+            "min": 0
+          }
+        ]
+      },
+      {
+        "id": 12,
+        "title": "Cache Performance",
+        "type": "graph",
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 48},
+        "targets": [
+          {
+            "expr": "rate(redis_commands_processed_total[5m])",
+            "legendFormat": "Redis Commands/sec",
+            "refId": "A"
+          },
+          {
+            "expr": "redis_connected_clients",
+            "legendFormat": "Connected Clients",
+            "refId": "B"
+          },
+          {
+            "expr": "redis_memory_used_bytes / redis_memory_max_bytes * 100",
+            "legendFormat": "Memory Usage %",
+            "refId": "C"
+          },
+          {
+            "expr": "redis_keyspace_hits_total / (redis_keyspace_hits_total + redis_keyspace_misses_total) * 100",
+            "legendFormat": "Hit Rate %",
+            "refId": "D"
+          }
+        ],
+        "yAxes": [
+          {
+            "label": "Commands/sec",
+            "min": 0
+          },
+          {
+            "label": "Percentage",
+            "max": 100,
+            "min": 0
+          }
+        ]
+      }
+    ],
+    "annotations": {
+      "list": [
+        {
+          "builtIn": 1,
+          "datasource": "-- Grafana --",
+          "enable": true,
+          "hide": true,
+          "iconColor": "rgba(0, 211, 255, 1)",
+          "name": "Annotations & Alerts",
+          "type": "dashboard"
+        },
+        {
+          "datasource": "prometheus",
+          "enable": true,
+          "expr": "ALERTS{alertstate=\"firing\"}",
+          "iconColor": "red",
+          "name": "Alerts",
+          "titleFormat": "{{alertname}}",
+          "tagKeys": "severity,service"
+        }
+      ]
+    },
+    "editable": true,
+    "gnetId": null,
+    "graphTooltip": 0,
+    "links": [
+      {
+        "asDropdown": false,
+        "icon": "external link",
+        "includeVars": false,
+        "keepTime": false,
+        "tags": ["tamv"],
+        "targetBlank": false,
+        "title": "TAMV Dashboards",
+        "tooltip": "",
+        "type": "dashboards",
+        "url": ""
+      }
+    ],
+    "panels": [],
+    "hideControls": false
+  },
+  "overwrite": false,
+  "inputs": [
+    {
+      "name": "DS_PROMETHEUS",
+      "type": "datasource",
+      "pluginId": "prometheus",
+      "value": "prometheus"
+    }
+  ],
+  "meta": {
+    "type": "db",
+    "canSave": true,
+    "canEdit": true,
+    "canAdmin": true,
+    "canStar": true,
+    "slug": "tamv-production-monitoring",
+    "url": "/d/tamv-prod/tamv-production-monitoring",
+    "expires": "0001-01-01T00:00:00Z",
+    "created": "2026-01-31T00:00:00Z",
+    "updated": "2026-01-31T00:00:00Z",
+    "updatedBy": "admin",
+    "createdBy": "admin",
+    "version": 1,
+    "hasAcl": false,
+    "isFolder": false,
+    "folderId": 0,
+    "folderTitle": "General",
+    "folderUrl": "",
+    "provisioned": false,
+    "provisionedExternalId": ""
+  }
+}

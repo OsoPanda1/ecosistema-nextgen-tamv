@@ -1,0 +1,793 @@
+# CGIFTS TAMV - GraphQL Schema
+# Comprehensive API schema for CGIFTS with XR 3D effects and blockchain integration
+
+scalar DateTime
+scalar JSON
+scalar BigInt
+
+# Core Gift Types
+type Gift {
+  id: ID!
+  name: String!
+  price: Float!
+  currency: Currency!
+  effect: String!
+  category: GiftCategory!
+  special: Boolean
+  auction: Boolean
+  limited: Boolean
+  description: String
+  metadata: GiftMetadata
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+type GiftMetadata {
+  rarity: Float!
+  effectDuration: Int!
+  particleCount: Int!
+  shaderComplexity: ShaderComplexity!
+  tags: [String!]!
+  previewUrl: String
+  thumbnailUrl: String
+}
+
+enum Currency {
+  USD
+  MXN
+  MSR
+  ETH
+  BTC
+}
+
+enum GiftCategory {
+  LIGHT
+  EPIC
+  LEGENDARY
+  ULTRA
+}
+
+enum ShaderComplexity {
+  LOW
+  MEDIUM
+  HIGH
+  ULTRA
+}
+
+# Transaction Types
+type Transaction {
+  id: ID!
+  gift: Gift!
+  sender: User!
+  recipient: User!
+  amount: Float!
+  currency: Currency!
+  timestamp: DateTime!
+  effect: String!
+  effectId: String
+  status: TransactionStatus!
+  blockchainTxHash: String
+  metadata: TransactionMetadata
+  room: Room
+}
+
+type TransactionMetadata {
+  position: Vector3D
+  intensity: Float
+  customization: JSON
+  xrMode: Boolean
+  deviceType: String
+}
+
+enum TransactionStatus {
+  PENDING
+  ACTIVE
+  COMPLETED
+  FAILED
+  REFUNDED
+}
+
+type Vector3D {
+  x: Float!
+  y: Float!
+  z: Float!
+}
+
+# Auction Types
+type Auction {
+  id: ID!
+  gift: Gift!
+  creator: User!
+  startingBid: Float!
+  currentBid: Float!
+  highestBidder: User
+  startTime: DateTime!
+  endTime: DateTime!
+  status: AuctionStatus!
+  bids: [Bid!]!
+  metadata: AuctionMetadata
+  winner: User
+  finalPrice: Float
+}
+
+type AuctionMetadata {
+  reservePrice: Float
+  buyNowPrice: Float
+  auctionType: AuctionType!
+  description: String
+  images: [String!]
+}
+
+enum AuctionStatus {
+  ACTIVE
+  COMPLETED
+  CANCELLED
+  EXPIRED
+}
+
+enum AuctionType {
+  STANDARD
+  DUTCH
+  SEALED_BID
+  RESERVE
+}
+
+type Bid {
+  id: ID!
+  auction: Auction!
+  bidder: User!
+  amount: Float!
+  timestamp: DateTime!
+  status: BidStatus!
+  blockchainTxHash: String
+  metadata: JSON
+}
+
+enum BidStatus {
+  ACTIVE
+  OUTBID
+  WINNING
+  WON
+  CANCELLED
+}
+
+# User Types
+type User {
+  id: ID!
+  username: String!
+  displayName: String!
+  avatar: String
+  preferences: UserPreferences!
+  statistics: UserStatistics!
+  wallet: UserWallet!
+  createdAt: DateTime!
+  lastActive: DateTime
+  isOnline: Boolean!
+  xrSession: XRSession
+}
+
+type UserPreferences {
+  favoriteGifts: [Gift!]!
+  effectQuality: EffectQuality!
+  enableXR: Boolean!
+  enableHaptics: Boolean!
+  autoAcceptGifts: Boolean!
+  language: String!
+  timezone: String!
+}
+
+type UserStatistics {
+  giftsSent: Int!
+  giftsReceived: Int!
+  totalSpent: Float!
+  totalReceived: Float!
+  favoriteCategory: GiftCategory
+  auctionsWon: Int!
+  auctionsCreated: Int!
+  averageGiftValue: Float!
+  streak: Int!
+}
+
+type UserWallet {
+  balance: Float!
+  currency: Currency!
+  paymentMethods: [PaymentMethod!]!
+  transactions: [WalletTransaction!]!
+}
+
+type PaymentMethod {
+  id: ID!
+  type: PaymentMethodType!
+  provider: String!
+  last4: String
+  expiryDate: String
+  isDefault: Boolean!
+  metadata: JSON
+}
+
+enum PaymentMethodType {
+  CARD
+  CRYPTO
+  BANK
+  MSR_WALLET
+  PAYPAL
+  APPLE_PAY
+  GOOGLE_PAY
+}
+
+type WalletTransaction {
+  id: ID!
+  type: WalletTransactionType!
+  amount: Float!
+  currency: Currency!
+  timestamp: DateTime!
+  description: String!
+  status: TransactionStatus!
+  metadata: JSON
+}
+
+enum WalletTransactionType {
+  DEPOSIT
+  WITHDRAWAL
+  GIFT_PURCHASE
+  GIFT_RECEIVED
+  AUCTION_BID
+  AUCTION_WIN
+  REFUND
+  FEE
+}
+
+enum EffectQuality {
+  LOW
+  MEDIUM
+  HIGH
+  ULTRA
+}
+
+# Room Types
+type Room {
+  id: ID!
+  name: String!
+  type: RoomType!
+  participants: [User!]!
+  activeGifts: [Transaction!]!
+  settings: RoomSettings!
+  xrSpace: XRSpace
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  owner: User!
+}
+
+enum RoomType {
+  PUBLIC
+  PRIVATE
+  PREMIUM
+  EVENT
+  AUCTION_HOUSE
+}
+
+type RoomSettings {
+  maxParticipants: Int!
+  allowGifts: Boolean!
+  allowAuctions: Boolean!
+  effectQuality: EffectQuality!
+  moderationLevel: ModerationLevel!
+  requireInvite: Boolean!
+  allowRecording: Boolean!
+}
+
+enum ModerationLevel {
+  NONE
+  BASIC
+  STRICT
+  AI_MODERATED
+}
+
+type XRSpace {
+  sceneId: String!
+  position: Vector3D!
+  rotation: Vector3D!
+  scale: Vector3D!
+  environment: String!
+  lighting: JSON
+  physics: JSON
+}
+
+# XR Session Types
+type XRSession {
+  sessionId: ID!
+  user: User!
+  room: Room!
+  xrMode: XRMode!
+  capabilities: XRCapabilities!
+  position: Vector3D!
+  rotation: Vector3D!
+  controllers: [XRController!]!
+  startTime: DateTime!
+  isActive: Boolean!
+}
+
+enum XRMode {
+  VR
+  AR
+  MIXED
+  DESKTOP
+}
+
+type XRCapabilities {
+  handTracking: Boolean!
+  eyeTracking: Boolean!
+  hapticFeedback: Boolean!
+  spatialAudio: Boolean!
+  roomScale: Boolean!
+  passthrough: Boolean!
+}
+
+type XRController {
+  id: ID!
+  position: Vector3D!
+  rotation: Vector3D!
+  buttons: JSON!
+  hapticSupport: Boolean!
+  batteryLevel: Float
+}
+
+# Effect Types
+type Effect {
+  id: ID!
+  name: String!
+  type: EffectType!
+  complexity: ShaderComplexity!
+  duration: Int!
+  particleCount: Int
+  shaderUniforms: JSON
+  geometryData: EffectGeometry
+  animationCurves: EffectAnimation
+  previewUrl: String
+  tags: [String!]!
+}
+
+enum EffectType {
+  PARTICLE
+  SHADER
+  MESH
+  HYBRID
+  VOLUMETRIC
+}
+
+type EffectGeometry {
+  vertices: [Float!]!
+  indices: [Int!]!
+  uvs: [Float!]!
+  normals: [Float!]!
+}
+
+type EffectAnimation {
+  intensity: [Float!]!
+  scale: [Float!]!
+  rotation: [Float!]!
+  position: [Vector3D!]!
+}
+
+# Recommendation Types
+type Recommendation {
+  gift: Gift!
+  confidence: Float!
+  reason: String!
+  category: RecommendationCategory!
+  metadata: RecommendationMetadata
+}
+
+enum RecommendationCategory {
+  TRENDING
+  PERSONAL
+  OCCASION
+  AI_SUGGESTED
+  SOCIAL
+  SEASONAL
+}
+
+type RecommendationMetadata {
+  similarUsers: [User!]
+  occasionMatch: String
+  priceRange: PriceRange
+  popularity: Float
+  newness: Float
+}
+
+type PriceRange {
+  min: Float!
+  max: Float!
+}
+
+# Analytics Types
+type Analytics {
+  timeframe: AnalyticsTimeframe!
+  metrics: AnalyticsMetrics!
+  generatedAt: DateTime!
+}
+
+enum AnalyticsTimeframe {
+  HOUR
+  DAY
+  WEEK
+  MONTH
+  QUARTER
+  YEAR
+}
+
+type AnalyticsMetrics {
+  totalGifts: Int!
+  totalRevenue: Float!
+  uniqueUsers: Int!
+  averageGiftValue: Float!
+  popularGifts: [PopularGift!]!
+  userEngagement: UserEngagementMetrics!
+  auctionMetrics: AuctionMetrics!
+  xrMetrics: XRMetrics!
+}
+
+type PopularGift {
+  gift: Gift!
+  count: Int!
+  revenue: Float!
+  growth: Float!
+}
+
+type UserEngagementMetrics {
+  dailyActiveUsers: Int!
+  averageSessionTime: Float!
+  retentionRate: Float!
+  bounceRate: Float!
+  conversionRate: Float!
+}
+
+type AuctionMetrics {
+  totalAuctions: Int!
+  averageBidCount: Float!
+  averageFinalPrice: Float!
+  completionRate: Float!
+  participationRate: Float!
+}
+
+type XRMetrics {
+  xrSessions: Int!
+  averageXRSessionTime: Float!
+  xrGiftsSent: Int!
+  xrConversionRate: Float!
+  deviceBreakdown: JSON!
+}
+
+# Event Types
+type Event {
+  id: ID!
+  type: EventType!
+  timestamp: DateTime!
+  user: User!
+  data: JSON!
+  metadata: EventMetadata
+}
+
+enum EventType {
+  GIFT_SENT
+  GIFT_RECEIVED
+  AUCTION_CREATED
+  BID_PLACED
+  AUCTION_WON
+  EFFECT_STARTED
+  EFFECT_COMPLETED
+  USER_JOINED
+  USER_LEFT
+  XR_SESSION_STARTED
+  XR_SESSION_ENDED
+}
+
+type EventMetadata {
+  roomId: String
+  sessionId: String
+  deviceType: String
+  xrMode: Boolean
+  ipAddress: String
+  userAgent: String
+}
+
+# Blockchain Types
+type BlockchainTransaction {
+  txHash: String!
+  blockNumber: BigInt!
+  from: String!
+  to: String!
+  value: String!
+  gasUsed: BigInt!
+  gasPrice: String!
+  status: BlockchainStatus!
+  timestamp: DateTime!
+  metadata: BlockchainMetadata!
+  confirmations: Int!
+}
+
+enum BlockchainStatus {
+  PENDING
+  CONFIRMED
+  FAILED
+  DROPPED
+}
+
+type BlockchainMetadata {
+  giftId: String
+  auctionId: String
+  transactionType: BlockchainTransactionType!
+  network: String!
+  contractAddress: String
+}
+
+enum BlockchainTransactionType {
+  GIFT
+  BID
+  AUCTION_SETTLEMENT
+  REFUND
+  MINT_NFT
+  TRANSFER_NFT
+}
+
+# Input Types
+input SendGiftInput {
+  giftId: ID!
+  recipientId: ID!
+  roomId: ID
+  message: String
+  position: Vector3DInput
+  intensity: Float
+  customization: JSON
+}
+
+input Vector3DInput {
+  x: Float!
+  y: Float!
+  z: Float!
+}
+
+input CreateAuctionInput {
+  giftId: ID!
+  startingBid: Float!
+  duration: Int!
+  reservePrice: Float
+  buyNowPrice: Float
+  auctionType: AuctionType!
+  description: String
+}
+
+input PlaceBidInput {
+  auctionId: ID!
+  amount: Float!
+  maxBid: Float
+}
+
+input CreateRoomInput {
+  name: String!
+  type: RoomType!
+  settings: RoomSettingsInput!
+  xrSpace: XRSpaceInput
+}
+
+input RoomSettingsInput {
+  maxParticipants: Int!
+  allowGifts: Boolean!
+  allowAuctions: Boolean!
+  effectQuality: EffectQuality!
+  moderationLevel: ModerationLevel!
+  requireInvite: Boolean
+  allowRecording: Boolean
+}
+
+input XRSpaceInput {
+  sceneId: String!
+  position: Vector3DInput!
+  rotation: Vector3DInput!
+  scale: Vector3DInput!
+  environment: String!
+  lighting: JSON
+  physics: JSON
+}
+
+input UpdateUserPreferencesInput {
+  favoriteGifts: [ID!]
+  effectQuality: EffectQuality
+  enableXR: Boolean
+  enableHaptics: Boolean
+  autoAcceptGifts: Boolean
+  language: String
+  timezone: String
+}
+
+input AddPaymentMethodInput {
+  type: PaymentMethodType!
+  provider: String!
+  token: String!
+  isDefault: Boolean
+  metadata: JSON
+}
+
+# Pagination Input
+input PaginationInput {
+  page: Int = 1
+  limit: Int = 20
+  sortBy: String
+  sortOrder: SortOrder = DESC
+}
+
+enum SortOrder {
+  ASC
+  DESC
+}
+
+# Filter Inputs
+input GiftFilterInput {
+  category: GiftCategory
+  priceRange: PriceRangeInput
+  effects: [String!]
+  special: Boolean
+  auction: Boolean
+  search: String
+}
+
+input PriceRangeInput {
+  min: Float
+  max: Float
+}
+
+input TransactionFilterInput {
+  status: TransactionStatus
+  dateRange: DateRangeInput
+  giftCategory: GiftCategory
+  minAmount: Float
+  maxAmount: Float
+}
+
+input DateRangeInput {
+  start: DateTime!
+  end: DateTime!
+}
+
+# Response Types
+type PaginatedGifts {
+  gifts: [Gift!]!
+  pagination: PaginationInfo!
+}
+
+type PaginatedTransactions {
+  transactions: [Transaction!]!
+  pagination: PaginationInfo!
+}
+
+type PaginatedAuctions {
+  auctions: [Auction!]!
+  pagination: PaginationInfo!
+}
+
+type PaginationInfo {
+  page: Int!
+  limit: Int!
+  total: Int!
+  totalPages: Int!
+  hasNext: Boolean!
+  hasPrev: Boolean!
+}
+
+# Mutation Response Types
+type SendGiftResponse {
+  success: Boolean!
+  transaction: Transaction
+  error: String
+}
+
+type CreateAuctionResponse {
+  success: Boolean!
+  auction: Auction
+  error: String
+}
+
+type PlaceBidResponse {
+  success: Boolean!
+  bid: Bid
+  auction: Auction
+  error: String
+}
+
+# Query Root
+type Query {
+  # Gift Queries
+  gifts(filter: GiftFilterInput, pagination: PaginationInput): PaginatedGifts!
+  gift(id: ID!): Gift
+  giftsByCategory(category: GiftCategory!, pagination: PaginationInput): PaginatedGifts!
+  trendingGifts(limit: Int = 10): [Gift!]!
+  
+  # User Queries
+  me: User
+  user(id: ID!): User
+  users(search: String, pagination: PaginationInput): [User!]!
+  
+  # Transaction Queries
+  myTransactions(filter: TransactionFilterInput, pagination: PaginationInput): PaginatedTransactions!
+  transaction(id: ID!): Transaction
+  
+  # Auction Queries
+  auctions(status: AuctionStatus, pagination: PaginationInput): PaginatedAuctions!
+  auction(id: ID!): Auction
+  myAuctions(pagination: PaginationInput): PaginatedAuctions!
+  myBids(pagination: PaginationInput): [Bid!]!
+  
+  # Room Queries
+  rooms(type: RoomType, pagination: PaginationInput): [Room!]!
+  room(id: ID!): Room
+  myRooms(pagination: PaginationInput): [Room!]!
+  
+  # Recommendation Queries
+  giftRecommendations(recipientId: ID, roomId: ID, limit: Int = 5): [Recommendation!]!
+  
+  # Analytics Queries
+  analytics(timeframe: AnalyticsTimeframe!): Analytics!
+  
+  # Effect Queries
+  effects(type: EffectType, complexity: ShaderComplexity): [Effect!]!
+  effect(id: ID!): Effect
+  
+  # XR Queries
+  xrSessions(roomId: ID): [XRSession!]!
+  myXRSession: XRSession
+}
+
+# Mutation Root
+type Mutation {
+  # Gift Mutations
+  sendGift(input: SendGiftInput!): SendGiftResponse!
+  
+  # Auction Mutations
+  createAuction(input: CreateAuctionInput!): CreateAuctionResponse!
+  placeBid(input: PlaceBidInput!): PlaceBidResponse!
+  cancelAuction(auctionId: ID!): Boolean!
+  
+  # Room Mutations
+  createRoom(input: CreateRoomInput!): Room!
+  joinRoom(roomId: ID!): Boolean!
+  leaveRoom(roomId: ID!): Boolean!
+  updateRoomSettings(roomId: ID!, settings: RoomSettingsInput!): Room!
+  
+  # User Mutations
+  updateProfile(displayName: String, avatar: String): User!
+  updatePreferences(input: UpdateUserPreferencesInput!): User!
+  addPaymentMethod(input: AddPaymentMethodInput!): PaymentMethod!
+  removePaymentMethod(paymentMethodId: ID!): Boolean!
+  
+  # Wallet Mutations
+  depositFunds(amount: Float!, currency: Currency!, paymentMethodId: ID!): WalletTransaction!
+  withdrawFunds(amount: Float!, currency: Currency!, paymentMethodId: ID!): WalletTransaction!
+  
+  # XR Mutations
+  startXRSession(roomId: ID!, xrMode: XRMode!): XRSession!
+  endXRSession: Boolean!
+  updateXRPosition(position: Vector3DInput!, rotation: Vector3DInput!): Boolean!
+}
+
+# Subscription Root
+type Subscription {
+  # Gift Subscriptions
+  giftSent(roomId: ID): Transaction!
+  giftReceived: Transaction!
+  
+  # Auction Subscriptions
+  auctionUpdated(auctionId: ID!): Auction!
+  bidPlaced(auctionId: ID!): Bid!
+  
+  # Room Subscriptions
+  roomUpdated(roomId: ID!): Room!
+  userJoinedRoom(roomId: ID!): User!
+  userLeftRoom(roomId: ID!): User!
+  
+  # XR Subscriptions
+  xrSessionUpdated(roomId: ID!): XRSession!
+  effectStarted(roomId: ID!): Transaction!
+  
+  # Real-time Events
+  liveEvents(roomId: ID): Event!
+}

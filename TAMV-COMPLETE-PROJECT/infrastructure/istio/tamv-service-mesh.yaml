@@ -1,0 +1,714 @@
+# TAMV Istio Service Mesh Configuration
+# Complete service mesh setup for TAMV production environment
+
+---
+# Istio Gateway for external traffic
+apiVersion: networking.istio.io/v1beta1
+kind: Gateway
+metadata:
+  name: tamv-gateway
+  namespace: tamv-production
+  labels:
+    app: tamv
+    component: gateway
+spec:
+  selector:
+    istio: ingressgateway
+  servers:
+  - port:
+      number: 443
+      name: https
+      protocol: HTTPS
+    tls:
+      mode: SIMPLE
+      credentialName: tamv-tls-secret
+    hosts:
+    - tamv.org
+    - api.tamv.org
+    - xr.tamv.org
+    - quantum.tamv.org
+    - ai.tamv.org
+    - blockchain.tamv.org
+  - port:
+      number: 80
+      name: http
+      protocol: HTTP
+    hosts:
+    - tamv.org
+    - api.tamv.org
+    - xr.tamv.org
+    - quantum.tamv.org
+    - ai.tamv.org
+    - blockchain.tamv.org
+    redirect:
+      httpsRedirect: true
+
+---
+# Virtual Service for routing
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: tamv-virtual-service
+  namespace: tamv-production
+  labels:
+    app: tamv
+    component: routing
+spec:
+  hosts:
+  - tamv.org
+  - api.tamv.org
+  - xr.tamv.org
+  - quantum.tamv.org
+  - ai.tamv.org
+  - blockchain.tamv.org
+  gateways:
+  - tamv-gateway
+  http:
+  # Core API Routes
+  - match:
+    - headers:
+        host:
+          exact: api.tamv.org
+      uri:
+        prefix: /identity
+    route:
+    - destination:
+        host: tamv-core-api-service
+        port:
+          number: 80
+    timeout: 30s
+    retries:
+      attempts: 3
+      perTryTimeout: 10s
+  
+  - match:
+    - headers:
+        host:
+          exact: api.tamv.org
+      uri:
+        prefix: /economy
+    route:
+    - destination:
+        host: tamv-core-api-service
+        port:
+          number: 80
+    timeout: 30s
+    retries:
+      attempts: 3
+      perTryTimeout: 10s
+  
+  - match:
+    - headers:
+        host:
+          exact: api.tamv.org
+      uri:
+        prefix: /governance
+    route:
+    - destination:
+        host: tamv-core-api-service
+        port:
+          number: 80
+    timeout: 30s
+    retries:
+      attempts: 3
+      perTryTimeout: 10s
+
+  # XR/VR Routes
+  - match:
+    - headers:
+        host:
+          exact: xr.tamv.org
+    route:
+    - destination:
+        host: tamv-xr-renderer-service
+        port:
+          number: 8080
+    timeout: 60s
+    retries:
+      attempts: 2
+      perTryTimeout: 30s
+
+  # Quantum Processing Routes
+  - match:
+    - headers:
+        host:
+          exact: quantum.tamv.org
+    route:
+    - destination:
+        host: tamv-quantum-processor-service
+        port:
+          number: 9000
+    timeout: 120s
+    retries:
+      attempts: 2
+      perTryTimeout: 60s
+
+  # Isabella AI Routes
+  - match:
+    - headers:
+        host:
+          exact: ai.tamv.org
+    route:
+    - destination:
+        host: tamv-isabella-ai-service
+        port:
+          number: 7000
+    timeout: 60s
+    retries:
+      attempts: 3
+      perTryTimeout: 20s
+
+  # Blockchain Routes
+  - match:
+    - headers:
+        host:
+          exact: blockchain.tamv.org
+    route:
+    - destination:
+        host: tamv-blockchain-service
+        port:
+          number: 6000
+    timeout: 30s
+    retries:
+      attempts: 3
+      perTryTimeout: 10s
+
+  # Default route to main application
+  - match:
+    - headers:
+        host:
+          exact: tamv.org
+    route:
+    - destination:
+        host: tamv-core-api-service
+        port:
+          number: 80
+
+---
+# Destination Rules for load balancing and circuit breaking
+apiVersion: networking.istio.io/v1beta1
+kind: DestinationRule
+metadata:
+  name: tamv-core-api-destination
+  namespace: tamv-production
+spec:
+  host: tamv-core-api-service
+  trafficPolicy:
+    loadBalancer:
+      simple: LEAST_CONN
+    connectionPool:
+      tcp:
+        maxConnections: 100
+      http:
+        http1MaxPendingRequests: 50
+        http2MaxRequests: 100
+        maxRequestsPerConnection: 10
+        maxRetries: 3
+        consecutiveGatewayErrors: 5
+        interval: 30s
+        baseEjectionTime: 30s
+        maxEjectionPercent: 50
+    circuitBreaker:
+      consecutiveGatewayErrors: 5
+      interval: 30s
+      baseEjectionTime: 30s
+      maxEjectionPercent: 50
+      minHealthPercent: 50
+  portLevelSettings:
+  - port:
+      number: 80
+    loadBalancer:
+      simple: ROUND_ROBIN
+
+---
+apiVersion: networking.istio.io/v1beta1
+kind: DestinationRule
+metadata:
+  name: tamv-xr-renderer-destination
+  namespace: tamv-production
+spec:
+  host: tamv-xr-renderer-service
+  trafficPolicy:
+    loadBalancer:
+      simple: LEAST_CONN
+    connectionPool:
+      tcp:
+        maxConnections: 50
+      http:
+        http1MaxPendingRequests: 25
+        http2MaxRequests: 50
+        maxRequestsPerConnection: 5
+        maxRetries: 2
+    circuitBreaker:
+      consecutiveGatewayErrors: 3
+      interval: 30s
+      baseEjectionTime: 60s
+      maxEjectionPercent: 30
+      minHealthPercent: 70
+
+---
+apiVersion: networking.istio.io/v1beta1
+kind: DestinationRule
+metadata:
+  name: tamv-quantum-processor-destination
+  namespace: tamv-production
+spec:
+  host: tamv-quantum-processor-service
+  trafficPolicy:
+    loadBalancer:
+      simple: ROUND_ROBIN
+    connectionPool:
+      tcp:
+        maxConnections: 20
+      http:
+        http1MaxPendingRequests: 10
+        http2MaxRequests: 20
+        maxRequestsPerConnection: 2
+        maxRetries: 1
+    circuitBreaker:
+      consecutiveGatewayErrors: 2
+      interval: 60s
+      baseEjectionTime: 120s
+      maxEjectionPercent: 20
+      minHealthPercent: 80
+
+---
+apiVersion: networking.istio.io/v1beta1
+kind: DestinationRule
+metadata:
+  name: tamv-isabella-ai-destination
+  namespace: tamv-production
+spec:
+  host: tamv-isabella-ai-service
+  trafficPolicy:
+    loadBalancer:
+      simple: LEAST_CONN
+    connectionPool:
+      tcp:
+        maxConnections: 30
+      http:
+        http1MaxPendingRequests: 15
+        http2MaxRequests: 30
+        maxRequestsPerConnection: 3
+        maxRetries: 2
+    circuitBreaker:
+      consecutiveGatewayErrors: 3
+      interval: 45s
+      baseEjectionTime: 90s
+      maxEjectionPercent: 25
+      minHealthPercent: 75
+
+---
+# Security Policies
+apiVersion: security.istio.io/v1beta1
+kind: PeerAuthentication
+metadata:
+  name: tamv-mtls-policy
+  namespace: tamv-production
+spec:
+  mtls:
+    mode: STRICT
+
+---
+# Authorization Policy for TAMV services
+apiVersion: security.istio.io/v1beta1
+kind: AuthorizationPolicy
+metadata:
+  name: tamv-authz-policy
+  namespace: tamv-production
+spec:
+  rules:
+  # Allow all traffic to core API
+  - to:
+    - operation:
+        methods: ["GET", "POST", "PUT", "DELETE"]
+    when:
+    - key: destination.service.name
+      values: ["tamv-core-api-service"]
+  
+  # Restrict quantum processor access
+  - to:
+    - operation:
+        methods: ["POST"]
+    when:
+    - key: destination.service.name
+      values: ["tamv-quantum-processor-service"]
+    - key: source.service_account
+      values: ["tamv-core-api", "tamv-isabella-ai"]
+  
+  # Restrict Isabella AI access
+  - to:
+    - operation:
+        methods: ["POST"]
+    when:
+    - key: destination.service.name
+      values: ["tamv-isabella-ai-service"]
+    - key: source.service_account
+      values: ["tamv-core-api", "tamv-quantum-processor"]
+  
+  # Allow XR renderer access
+  - to:
+    - operation:
+        methods: ["GET", "POST", "PUT"]
+    when:
+    - key: destination.service.name
+      values: ["tamv-xr-renderer-service"]
+  
+  # Restrict blockchain service access
+  - to:
+    - operation:
+        methods: ["GET", "POST"]
+    when:
+    - key: destination.service.name
+      values: ["tamv-blockchain-service"]
+    - key: source.service_account
+      values: ["tamv-core-api", "tamv-isabella-ai"]
+
+---
+# Request Authentication for JWT tokens
+apiVersion: security.istio.io/v1beta1
+kind: RequestAuthentication
+metadata:
+  name: tamv-jwt-auth
+  namespace: tamv-production
+spec:
+  selector:
+    matchLabels:
+      app: tamv-core-api
+  jwtRules:
+  - issuer: "https://auth.tamv.org"
+    jwksUri: "https://auth.tamv.org/.well-known/jwks.json"
+    audiences:
+    - "tamv-api"
+    - "tamv-xr"
+    - "tamv-quantum"
+    forwardOriginalToken: true
+
+---
+# Service Monitor for Prometheus scraping
+apiVersion: v1
+kind: ServiceMonitor
+metadata:
+  name: tamv-service-monitor
+  namespace: tamv-production
+  labels:
+    app: tamv
+    component: monitoring
+spec:
+  selector:
+    matchLabels:
+      app: tamv
+  endpoints:
+  - port: metrics
+    interval: 30s
+    path: /metrics
+    scheme: http
+  - port: istio-proxy
+    interval: 15s
+    path: /stats/prometheus
+    scheme: http
+
+---
+# Telemetry configuration for distributed tracing
+apiVersion: telemetry.istio.io/v1alpha1
+kind: Telemetry
+metadata:
+  name: tamv-tracing
+  namespace: tamv-production
+spec:
+  tracing:
+  - providers:
+    - name: jaeger
+  metrics:
+  - providers:
+    - name: prometheus
+  - overrides:
+    - match:
+        metric: ALL_METRICS
+      tagOverrides:
+        request_protocol:
+          operation: UPSERT
+          value: "http"
+        response_code:
+          operation: UPSERT
+          value: "%{RESPONSE_CODE}"
+        source_app:
+          operation: UPSERT
+          value: "%{SOURCE_APP}"
+        destination_service_name:
+          operation: UPSERT
+          value: "%{DESTINATION_SERVICE_NAME}"
+
+---
+# Envoy Filter for custom headers
+apiVersion: networking.istio.io/v1alpha3
+kind: EnvoyFilter
+metadata:
+  name: tamv-custom-headers
+  namespace: tamv-production
+spec:
+  configPatches:
+  - applyTo: HTTP_FILTER
+    match:
+      context: SIDECAR_INBOUND
+      listener:
+        filterChain:
+          filter:
+            name: "envoy.filters.network.http_connection_manager"
+    patch:
+      operation: INSERT_BEFORE
+      value:
+        name: envoy.filters.http.lua
+        typed_config:
+          "@type": type.googleapis.com/envoy.extensions.filters.http.lua.v3.Lua
+          inline_code: |
+            function envoy_on_request(request_handle)
+              -- Add TAMV custom headers
+              request_handle:headers():add("x-tamv-version", "1.0")
+              request_handle:headers():add("x-tamv-environment", "production")
+              request_handle:headers():add("x-tamv-timestamp", os.time())
+            end
+            
+            function envoy_on_response(response_handle)
+              -- Add security headers
+              response_handle:headers():add("x-content-type-options", "nosniff")
+              response_handle:headers():add("x-frame-options", "DENY")
+              response_handle:headers():add("x-xss-protection", "1; mode=block")
+              response_handle:headers():add("strict-transport-security", "max-age=31536000; includeSubDomains")
+              response_handle:headers():add("x-tamv-processed", "true")
+            end
+
+---
+# Fault Injection for testing resilience
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: tamv-fault-injection
+  namespace: tamv-production
+  labels:
+    app: tamv
+    component: testing
+spec:
+  hosts:
+  - tamv-core-api-service
+  http:
+  - match:
+    - headers:
+        x-tamv-test-fault:
+          exact: "true"
+    fault:
+      delay:
+        percentage:
+          value: 10
+        fixedDelay: 5s
+      abort:
+        percentage:
+          value: 5
+        httpStatus: 503
+    route:
+    - destination:
+        host: tamv-core-api-service
+  - route:
+    - destination:
+        host: tamv-core-api-service
+
+---
+# Workload Entry for external services
+apiVersion: networking.istio.io/v1beta1
+kind: WorkloadEntry
+metadata:
+  name: tamv-external-blockchain
+  namespace: tamv-production
+spec:
+  address: ethereum-mainnet.infura.io
+  ports:
+    https: 443
+  labels:
+    app: ethereum
+    version: mainnet
+
+---
+apiVersion: networking.istio.io/v1beta1
+kind: ServiceEntry
+metadata:
+  name: tamv-external-services
+  namespace: tamv-production
+spec:
+  hosts:
+  - ethereum-mainnet.infura.io
+  - polygon-mainnet.infura.io
+  - api.github.com
+  - en.wikipedia.org
+  - sourcegraph.com
+  ports:
+  - number: 443
+    name: https
+    protocol: HTTPS
+  - number: 80
+    name: http
+    protocol: HTTP
+  location: MESH_EXTERNAL
+  resolution: DNS
+
+---
+# Sidecar configuration for resource optimization
+apiVersion: networking.istio.io/v1beta1
+kind: Sidecar
+metadata:
+  name: tamv-sidecar-config
+  namespace: tamv-production
+spec:
+  workloadSelector:
+    labels:
+      app: tamv
+  ingress:
+  - port:
+      number: 8080
+      protocol: HTTP
+      name: http
+    defaultEndpoint: 127.0.0.1:3000
+  egress:
+  - hosts:
+    - "./*"
+    - "istio-system/*"
+    - "kube-system/*"
+  - hosts:
+    - "ethereum-mainnet.infura.io"
+    - "polygon-mainnet.infura.io"
+    - "api.github.com"
+    - "en.wikipedia.org"
+    - "sourcegraph.com"
+
+---
+# Istio Proxy configuration
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: tamv-proxy-config
+  namespace: tamv-production
+data:
+  custom_bootstrap.json: |
+    {
+      "static_resources": {
+        "clusters": [
+          {
+            "name": "tamv_telemetry",
+            "type": "STRICT_DNS",
+            "lb_policy": "ROUND_ROBIN",
+            "load_assignment": {
+              "cluster_name": "tamv_telemetry",
+              "endpoints": [
+                {
+                  "lb_endpoints": [
+                    {
+                      "endpoint": {
+                        "address": {
+                          "socket_address": {
+                            "address": "jaeger-collector.istio-system.svc.cluster.local",
+                            "port_value": 14268
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      }
+    }
+
+---
+# Network Policy for additional security
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: tamv-network-policy
+  namespace: tamv-production
+spec:
+  podSelector:
+    matchLabels:
+      app: tamv
+  policyTypes:
+  - Ingress
+  - Egress
+  ingress:
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          name: istio-system
+    - namespaceSelector:
+        matchLabels:
+          name: tamv-production
+    ports:
+    - protocol: TCP
+      port: 8080
+    - protocol: TCP
+      port: 15090
+  egress:
+  - to:
+    - namespaceSelector:
+        matchLabels:
+          name: istio-system
+    - namespaceSelector:
+        matchLabels:
+          name: tamv-production
+    - namespaceSelector:
+        matchLabels:
+          name: kube-system
+  - to: []
+    ports:
+    - protocol: TCP
+      port: 443
+    - protocol: TCP
+      port: 80
+    - protocol: UDP
+      port: 53
+
+---
+# Horizontal Pod Autoscaler for Istio Gateway
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: istio-ingressgateway-hpa
+  namespace: istio-system
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: istio-ingressgateway
+  minReplicas: 3
+  maxReplicas: 20
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 70
+  - type: Resource
+    resource:
+      name: memory
+      target:
+        type: Utilization
+        averageUtilization: 80
+
+---
+# Service for Istio metrics
+apiVersion: v1
+kind: Service
+metadata:
+  name: tamv-istio-metrics
+  namespace: tamv-production
+  labels:
+    app: tamv
+    component: metrics
+spec:
+  ports:
+  - name: http-monitoring
+    port: 15090
+    targetPort: 15090
+  selector:
+    app: tamv
+  type: ClusterIP

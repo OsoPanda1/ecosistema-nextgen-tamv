@@ -1,0 +1,325 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* TAMV Custom Styles for Lovable.ai - CORREGIDO */
+
+/* Base styles */
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Custom animations */
+@keyframes float {
+  0%, 100% { 
+    transform: translateY(0px); 
+  }
+  50% { 
+    transform: translateY(-20px); 
+  }
+}
+
+@keyframes pulse-glow {
+  0%, 100% { 
+    box-shadow: 0 0 20px rgba(139, 92, 246, 0.3); 
+  }
+  50% { 
+    box-shadow: 0 0 40px rgba(139, 92, 246, 0.6); 
+  }
+}
+
+@keyframes gradient-shift {
+  0% { 
+    background-position: 0% 50%; 
+  }
+  50% { 
+    background-position: 100% 50%; 
+  }
+  100% { 
+    background-position: 0% 50%; 
+  }
+}
+
+@keyframes loading {
+  0% { 
+    background-position: 200% 0; 
+  }
+  100% { 
+    background-position: -200% 0; 
+  }
+}
+
+/* Utility classes */
+.animate-float {
+  animation: float 6s ease-in-out infinite;
+}
+
+.animate-pulse-glow {
+  animation: pulse-glow 2s ease-in-out infinite;
+}
+
+.animate-gradient {
+  background-size: 200% 200%;
+  animation: gradient-shift 3s ease infinite;
+}
+
+/* Hero gradient */
+.hero-gradient {
+  background: linear-gradient(135deg, 
+    #1e1b4b 0%, 
+    #312e81 25%, 
+    #3730a3 50%, 
+    #1e40af 75%, 
+    #1e3a8a 100%);
+}
+
+/* Glass effect */
+.glass-effect {
+  backdrop-filter: blur(16px);
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+/* Text effects */
+.text-glow {
+  text-shadow: 0 0 20px rgba(139, 92, 246, 0.5);
+}
+
+.text-shimmer {
+  background: linear-gradient(
+    90deg,
+    #8b5cf6 0%,
+    #3b82f6 50%,
+    #8b5cf6 100%
+  );
+  background-size: 200% 100%;
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: gradient-shift 2s ease-in-out infinite;
+}
+
+/* Hover effects */
+.hover-lift {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.hover-lift:hover {
+  transform: translateY(-8px) scale(1.02);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+}
+
+/* Interactive elements */
+.interactive-card {
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.interactive-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15);
+}
+
+/* Button effects */
+.btn-glow {
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-glow::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.2),
+    transparent
+  );
+  transition: left 0.5s;
+}
+
+.btn-glow:hover::before {
+  left: 100%;
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #1f2937;
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(to bottom, #8b5cf6, #3b82f6);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(to bottom, #7c3aed, #2563eb);
+}
+
+/* Loading states */
+.skeleton {
+  background: linear-gradient(90deg, #374151 25%, #4b5563 50%, #374151 75%);
+  background-size: 200% 100%;
+  animation: loading 1.5s infinite;
+}
+
+/* TAMV Brand Colors */
+:root {
+  --tamv-primary: #6366f1;
+  --tamv-secondary: #8b5cf6;
+  --tamv-accent: #06b6d4;
+  --tamv-success: #10b981;
+  --tamv-warning: #f59e0b;
+  --tamv-error: #ef4444;
+}
+
+/* Responsive improvements */
+@media (max-width: 768px) {
+  .hero-gradient {
+    min-height: 100vh;
+    padding: 2rem 1rem;
+  }
+  
+  .text-6xl {
+    font-size: 3rem !important;
+  }
+  
+  .text-8xl {
+    font-size: 4rem !important;
+  }
+  
+  .py-20 {
+    padding-top: 3rem !important;
+    padding-bottom: 3rem !important;
+  }
+}
+
+@media (max-width: 640px) {
+  .container {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+  
+  .grid-cols-4 {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+  
+  .text-5xl {
+    font-size: 2.5rem !important;
+  }
+  
+  .px-6 {
+    padding-left: 1rem !important;
+    padding-right: 1rem !important;
+  }
+}
+
+/* Tailwind compatibility fixes */
+.bg-gradient-to-br {
+  background-image: linear-gradient(to bottom right, var(--tw-gradient-stops));
+}
+
+.bg-gradient-to-r {
+  background-image: linear-gradient(to right, var(--tw-gradient-stops));
+}
+
+/* Text rendering fixes */
+.bg-clip-text {
+  -webkit-background-clip: text;
+  background-clip: text;
+}
+
+.text-transparent {
+  color: transparent;
+}
+
+/* Backdrop blur fix */
+.backdrop-blur-lg {
+  backdrop-filter: blur(16px);
+}
+
+/* Border opacity classes - Fixed syntax */
+.border-white-10 {
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+.border-white-20 {
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.border-white-30 {
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+/* Background opacity classes - Fixed syntax */
+.bg-white-10 {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.bg-white-20 {
+  background-color: rgba(255, 255, 255, 0.2);
+}
+
+.bg-white-30 {
+  background-color: rgba(255, 255, 255, 0.3);
+}
+
+/* Additional utility classes for TAMV */
+.tamv-gradient-primary {
+  background: linear-gradient(135deg, var(--tamv-primary), var(--tamv-secondary));
+}
+
+.tamv-gradient-accent {
+  background: linear-gradient(135deg, var(--tamv-accent), var(--tamv-primary));
+}
+
+.tamv-shadow-glow {
+  box-shadow: 0 0 30px rgba(99, 102, 241, 0.3);
+}
+
+.tamv-text-gradient {
+  background: linear-gradient(135deg, var(--tamv-primary), var(--tamv-accent));
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* Smooth transitions for all interactive elements */
+.tamv-transition {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Focus states for accessibility */
+.tamv-focus:focus {
+  outline: 2px solid var(--tamv-primary);
+  outline-offset: 2px;
+}
+
+/* Print styles */
+@media print {
+  .no-print {
+    display: none !important;
+  }
+  
+  body {
+    background: white !important;
+    color: black !important;
+  }
+}

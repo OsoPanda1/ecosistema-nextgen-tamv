@@ -1,0 +1,130 @@
+{
+  "mcpServers": {
+    "stripe": {
+      "command": "uvx",
+      "args": ["stripe-mcp-server@latest"],
+      "env": {
+        "STRIPE_SECRET_KEY": "{{STRIPE_SECRET_KEY}}",
+        "STRIPE_WEBHOOK_SECRET": "{{STRIPE_WEBHOOK_SECRET}}",
+        "FASTMCP_LOG_LEVEL": "ERROR"
+      },
+      "disabled": false,
+      "autoApprove": [
+        "create_checkout_session",
+        "create_customer",
+        "create_subscription",
+        "create_payment_intent",
+        "create_refund",
+        "list_customers",
+        "list_subscriptions",
+        "retrieve_balance"
+      ]
+    },
+    "aws-knowledge": {
+      "command": "uvx",
+      "args": ["awslabs.aws-knowledge-mcp-server@latest"],
+      "env": {
+        "FASTMCP_LOG_LEVEL": "ERROR"
+      },
+      "disabled": false,
+      "autoApprove": [
+        "search_documentation",
+        "get_regional_availability",
+        "list_regions",
+        "read_documentation"
+      ]
+    },
+    "aws-api": {
+      "command": "uvx", 
+      "args": ["awslabs.aws-api-mcp-server@latest"],
+      "env": {
+        "AWS_REGION": "us-east-1",
+        "FASTMCP_LOG_LEVEL": "ERROR"
+      },
+      "disabled": false,
+      "autoApprove": [
+        "describe_instances",
+        "list_buckets",
+        "get_secret_value",
+        "put_secret_value"
+      ]
+    },
+    "dynamodb": {
+      "command": "uvx",
+      "args": ["awslabs.dynamodb-mcp-server@latest"],
+      "env": {
+        "AWS_REGION": "us-east-1",
+        "FASTMCP_LOG_LEVEL": "ERROR"
+      },
+      "disabled": false,
+      "autoApprove": [
+        "query",
+        "scan",
+        "put_item",
+        "get_item",
+        "update_item",
+        "delete_item"
+      ]
+    },
+    "serverless": {
+      "command": "uvx",
+      "args": ["awslabs.aws-serverless-mcp@latest"],
+      "env": {
+        "AWS_REGION": "us-east-1",
+        "FASTMCP_LOG_LEVEL": "ERROR"
+      },
+      "disabled": false,
+      "autoApprove": [
+        "deploy_function",
+        "update_function",
+        "create_api_gateway",
+        "deploy_stack"
+      ]
+    },
+    "aws-pricing": {
+      "command": "uvx",
+      "args": ["awslabs.aws-pricing-mcp-server@latest"],
+      "env": {
+        "FASTMCP_LOG_LEVEL": "ERROR"
+      },
+      "disabled": false,
+      "autoApprove": [
+        "get_pricing",
+        "calculate_cost",
+        "compare_pricing"
+      ]
+    },
+    "context7": {
+      "command": "npx",
+      "args": ["-y", "@upstash/context7-mcp"],
+      "env": {
+        "FASTMCP_LOG_LEVEL": "ERROR"
+      },
+      "disabled": false,
+      "autoApprove": [
+        "resolve-library-id",
+        "query-docs"
+      ]
+    },
+    "fetch": {
+      "command": "uvx",
+      "args": ["mcp-server-fetch"],
+      "env": {
+        "FASTMCP_LOG_LEVEL": "ERROR"
+      },
+      "disabled": false,
+      "autoApprove": [
+        "fetch"
+      ]
+    },
+    "playwright": {
+      "command": "uvx",
+      "args": ["playwright-mcp-server"],
+      "env": {
+        "FASTMCP_LOG_LEVEL": "ERROR"
+      },
+      "disabled": true,
+      "autoApprove": []
+    }
+  }
+}

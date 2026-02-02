@@ -1,0 +1,683 @@
+# TAMV Core Application Deployment
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: tamv-production
+  labels:
+    name: tamv-production
+    project: tamv
+    environment: production
+
+---
+# ConfigMap for TAMV Configuration
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: tamv-config
+  namespace: tamv-production
+data:
+  # Database Configuration
+  POSTGRES_HOST: "tamv-postgres-production.cluster-xyz.us-west-2.rds.amazonaws.com"
+  POSTGRES_PORT: "5432"
+  POSTGRES_DB: "tamv_production"
+  REDIS_HOST: "tamv-redis-production.abc123.cache.amazonaws.com"
+  REDIS_PORT: "6379"
+  
+  # Application Configuration
+  NODE_ENV: "production"
+  LOG_LEVEL: "info"
+  
+  # TAMV Specific Configuration
+  TAMV_ENVIRONMENT: "production"
+  TAMV_CLUSTER_NAME: "tamv-production"
+  TAMV_REGION: "us-west-2"
+  
+  # XR/VR Configuration
+  XR_RENDER_QUALITY: "ultra"
+  XR_MAX_CONCURRENT_USERS: "10000"
+  XR_PHYSICS_ENGINE: "quantum-enhanced"
+  
+  # Quantum Computing Configuration
+  QUANTUM_BACKEND: "hybrid-classical-quantum"
+  QUANTUM_SIMULATOR: "qiskit-aer"
+  QUANTUM_MAX_QUBITS: "1000"
+  
+  # Isabella AI Configuration
+  ISABELLA_MODEL_VERSION: "v2.1"
+  ISABELLA_EXPLANATION_LEVEL: "detailed"
+  ISABELLA_ETHICAL_MODE: "strict"
+  
+  # Blockchain Configuration
+  BLOCKCHAIN_NETWORKS: "ethereum,polygon,solana"
+  MSR_ANCHOR_INTERVAL: "3600"
+  
+  # Security Configuration
+  TENOCHTITLAN_MODE: "active"
+  SECURITY_LEVEL: "maximum"
+  AUDIT_MODE: "comprehensive"
+
+---
+# Secret for sensitive data
+apiVersion: v1
+kind: Secret
+metadata:
+  name: tamv-secrets
+  namespace: tamv-production
+type: Opaque
+stringData:
+  POSTGRES_PASSWORD: "REPLACE_WITH_ACTUAL_PASSWORD"
+  REDIS_PASSWORD: "REPLACE_WITH_ACTUAL_PASSWORD"
+  JWT_SECRET: "REPLACE_WITH_ACTUAL_JWT_SECRET"
+  BLOCKCHAIN_PRIVATE_KEY: "REPLACE_WITH_ACTUAL_PRIVATE_KEY"
+  ISABELLA_API_KEY: "REPLACE_WITH_ACTUAL_API_KEY"
+
+---
+# TAMV Core API Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: tamv-core-api
+  namespace: tamv-production
+  labels:
+    app: tamv-core-api
+    component: backend
+    tier: api
+spec:
+  replicas: 6
+  selector:
+    matchLabels:
+      app: tamv-core-api
+  template:
+    metadata:
+      labels:
+        app: tamv-core-api
+        component: backend
+        tier: api
+    spec:
+      containers:
+      - name: tamv-core-api
+        image: tamv/core-api:v1.0.0
+        ports:
+        - containerPort: 3000
+          name: http
+        - containerPort: 3001
+          name: websocket
+        env:
+        - name: PORT
+          value: "3000"
+        - name: WEBSOCKET_PORT
+          value: "3001"
+        envFrom:
+        - configMapRef:
+            name: tamv-config
+        - secretRef:
+            name: tamv-secrets
+        resources:
+          requests:
+            memory: "2Gi"
+            cpu: "1000m"
+          limits:
+            memory: "4Gi"
+            cpu: "2000m"
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 3000
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /ready
+            port: 3000
+          initialDelaySeconds: 5
+          periodSeconds: 5
+        volumeMounts:
+        - name: tamv-storage
+          mountPath: /app/storage
+      volumes:
+      - name: tamv-storage
+        persistentVolumeClaim:
+          claimName: tamv-storage-pvc
+      nodeSelector:
+        role: general-workload
+
+---
+# TAMV XR Renderer Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: tamv-xr-renderer
+  namespace: tamv-production
+  labels:
+    app: tamv-xr-renderer
+    component: xr
+    tier: rendering
+spec:
+  replicas: 8
+  selector:
+    matchLabels:
+      app: tamv-xr-renderer
+  template:
+    metadata:
+      labels:
+        app: tamv-xr-renderer
+        component: xr
+        tier: rendering
+    spec:
+      containers:
+      - name: tamv-xr-renderer
+        image: tamv/xr-renderer:v1.0.0
+        ports:
+        - containerPort: 8080
+          name: xr-http
+        - containerPort: 8081
+          name: xr-websocket
+        env:
+        - name: XR_PORT
+          value: "8080"
+        - name: XR_WEBSOCKET_PORT
+          value: "8081"
+        - name: GPU_ACCELERATION
+          value: "true"
+        envFrom:
+        - configMapRef:
+            name: tamv-config
+        - secretRef:
+            name: tamv-secrets
+        resources:
+          requests:
+            memory: "8Gi"
+            cpu: "4000m"
+            nvidia.com/gpu: 1
+          limits:
+            memory: "16Gi"
+            cpu: "8000m"
+            nvidia.com/gpu: 2
+        livenessProbe:
+          httpGet:
+            path: /xr/health
+            port: 8080
+          initialDelaySeconds: 60
+          periodSeconds: 15
+        readinessProbe:
+          httpGet:
+            path: /xr/ready
+            port: 8080
+          initialDelaySeconds: 30
+          periodSeconds: 10
+      nodeSelector:
+        role: xr-rendering
+      tolerations:
+      - key: nvidia.com/gpu
+        operator: Exists
+        effect: NoSchedule
+
+---
+# TAMV Quantum Processor Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: tamv-quantum-processor
+  namespace: tamv-production
+  labels:
+    app: tamv-quantum-processor
+    component: quantum
+    tier: computation
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: tamv-quantum-processor
+  template:
+    metadata:
+      labels:
+        app: tamv-quantum-processor
+        component: quantum
+        tier: computation
+    spec:
+      containers:
+      - name: tamv-quantum-processor
+        image: tamv/quantum-processor:v1.0.0
+        ports:
+        - containerPort: 9000
+          name: quantum-api
+        env:
+        - name: QUANTUM_PORT
+          value: "9000"
+        - name: QISKIT_BACKEND
+          value: "aer_simulator"
+        - name: MAX_QUBITS
+          value: "1000"
+        envFrom:
+        - configMapRef:
+            name: tamv-config
+        - secretRef:
+            name: tamv-secrets
+        resources:
+          requests:
+            memory: "16Gi"
+            cpu: "8000m"
+          limits:
+            memory: "32Gi"
+            cpu: "16000m"
+        livenessProbe:
+          httpGet:
+            path: /quantum/health
+            port: 9000
+          initialDelaySeconds: 120
+          periodSeconds: 30
+        readinessProbe:
+          httpGet:
+            path: /quantum/ready
+            port: 9000
+          initialDelaySeconds: 60
+          periodSeconds: 15
+      nodeSelector:
+        role: quantum-processing
+
+---
+# Isabella AI Service Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: tamv-isabella-ai
+  namespace: tamv-production
+  labels:
+    app: tamv-isabella-ai
+    component: ai
+    tier: intelligence
+spec:
+  replicas: 4
+  selector:
+    matchLabels:
+      app: tamv-isabella-ai
+  template:
+    metadata:
+      labels:
+        app: tamv-isabella-ai
+        component: ai
+        tier: intelligence
+    spec:
+      containers:
+      - name: tamv-isabella-ai
+        image: tamv/isabella-ai:v2.1.0
+        ports:
+        - containerPort: 7000
+          name: ai-api
+        env:
+        - name: AI_PORT
+          value: "7000"
+        - name: MODEL_PATH
+          value: "/models/isabella-v2.1"
+        - name: ETHICAL_MODE
+          value: "strict"
+        envFrom:
+        - configMapRef:
+            name: tamv-config
+        - secretRef:
+            name: tamv-secrets
+        resources:
+          requests:
+            memory: "12Gi"
+            cpu: "6000m"
+            nvidia.com/gpu: 1
+          limits:
+            memory: "24Gi"
+            cpu: "12000m"
+            nvidia.com/gpu: 2
+        livenessProbe:
+          httpGet:
+            path: /ai/health
+            port: 7000
+          initialDelaySeconds: 180
+          periodSeconds: 30
+        readinessProbe:
+          httpGet:
+            path: /ai/ready
+            port: 7000
+          initialDelaySeconds: 120
+          periodSeconds: 20
+        volumeMounts:
+        - name: isabella-models
+          mountPath: /models
+      volumes:
+      - name: isabella-models
+        persistentVolumeClaim:
+          claimName: isabella-models-pvc
+      nodeSelector:
+        role: quantum-processing
+      tolerations:
+      - key: nvidia.com/gpu
+        operator: Exists
+        effect: NoSchedule
+
+---
+# TAMV Blockchain Service Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: tamv-blockchain-service
+  namespace: tamv-production
+  labels:
+    app: tamv-blockchain-service
+    component: blockchain
+    tier: ledger
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: tamv-blockchain-service
+  template:
+    metadata:
+      labels:
+        app: tamv-blockchain-service
+        component: blockchain
+        tier: ledger
+    spec:
+      containers:
+      - name: tamv-blockchain-service
+        image: tamv/blockchain-service:v1.0.0
+        ports:
+        - containerPort: 6000
+          name: blockchain-api
+        env:
+        - name: BLOCKCHAIN_PORT
+          value: "6000"
+        - name: MSR_ENABLED
+          value: "true"
+        - name: NETWORKS
+          value: "ethereum,polygon,solana"
+        envFrom:
+        - configMapRef:
+            name: tamv-config
+        - secretRef:
+            name: tamv-secrets
+        resources:
+          requests:
+            memory: "4Gi"
+            cpu: "2000m"
+          limits:
+            memory: "8Gi"
+            cpu: "4000m"
+        livenessProbe:
+          httpGet:
+            path: /blockchain/health
+            port: 6000
+          initialDelaySeconds: 60
+          periodSeconds: 20
+        readinessProbe:
+          httpGet:
+            path: /blockchain/ready
+            port: 6000
+          initialDelaySeconds: 30
+          periodSeconds: 10
+      nodeSelector:
+        role: general-workload
+
+---
+# TAMV Security Service (Tenochtitlan)
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: tamv-tenochtitlan-security
+  namespace: tamv-production
+  labels:
+    app: tamv-tenochtitlan-security
+    component: security
+    tier: protection
+spec:
+  replicas: 5
+  selector:
+    matchLabels:
+      app: tamv-tenochtitlan-security
+  template:
+    metadata:
+      labels:
+        app: tamv-tenochtitlan-security
+        component: security
+        tier: protection
+    spec:
+      containers:
+      - name: anubis-centinel
+        image: tamv/anubis-centinel:v1.0.0
+        ports:
+        - containerPort: 5000
+          name: anubis-api
+        env:
+        - name: ANUBIS_PORT
+          value: "5000"
+        - name: SECURITY_LEVEL
+          value: "maximum"
+        envFrom:
+        - configMapRef:
+            name: tamv-config
+        - secretRef:
+            name: tamv-secrets
+        resources:
+          requests:
+            memory: "2Gi"
+            cpu: "1000m"
+          limits:
+            memory: "4Gi"
+            cpu: "2000m"
+      - name: horus-centinel
+        image: tamv/horus-centinel:v1.0.0
+        ports:
+        - containerPort: 5001
+          name: horus-api
+        env:
+        - name: HORUS_PORT
+          value: "5001"
+        - name: STANDBY_MODE
+          value: "active"
+        envFrom:
+        - configMapRef:
+            name: tamv-config
+        - secretRef:
+            name: tamv-secrets
+        resources:
+          requests:
+            memory: "2Gi"
+            cpu: "1000m"
+          limits:
+            memory: "4Gi"
+            cpu: "2000m"
+      nodeSelector:
+        role: general-workload
+
+---
+# Services for TAMV Components
+apiVersion: v1
+kind: Service
+metadata:
+  name: tamv-core-api-service
+  namespace: tamv-production
+  labels:
+    app: tamv-core-api
+spec:
+  selector:
+    app: tamv-core-api
+  ports:
+  - name: http
+    port: 80
+    targetPort: 3000
+  - name: websocket
+    port: 3001
+    targetPort: 3001
+  type: ClusterIP
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: tamv-xr-renderer-service
+  namespace: tamv-production
+  labels:
+    app: tamv-xr-renderer
+spec:
+  selector:
+    app: tamv-xr-renderer
+  ports:
+  - name: xr-http
+    port: 8080
+    targetPort: 8080
+  - name: xr-websocket
+    port: 8081
+    targetPort: 8081
+  type: ClusterIP
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: tamv-quantum-processor-service
+  namespace: tamv-production
+  labels:
+    app: tamv-quantum-processor
+spec:
+  selector:
+    app: tamv-quantum-processor
+  ports:
+  - name: quantum-api
+    port: 9000
+    targetPort: 9000
+  type: ClusterIP
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: tamv-isabella-ai-service
+  namespace: tamv-production
+  labels:
+    app: tamv-isabella-ai
+spec:
+  selector:
+    app: tamv-isabella-ai
+  ports:
+  - name: ai-api
+    port: 7000
+    targetPort: 7000
+  type: ClusterIP
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: tamv-blockchain-service
+  namespace: tamv-production
+  labels:
+    app: tamv-blockchain-service
+spec:
+  selector:
+    app: tamv-blockchain-service
+  ports:
+  - name: blockchain-api
+    port: 6000
+    targetPort: 6000
+  type: ClusterIP
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: tamv-tenochtitlan-security-service
+  namespace: tamv-production
+  labels:
+    app: tamv-tenochtitlan-security
+spec:
+  selector:
+    app: tamv-tenochtitlan-security
+  ports:
+  - name: anubis-api
+    port: 5000
+    targetPort: 5000
+  - name: horus-api
+    port: 5001
+    targetPort: 5001
+  type: ClusterIP
+
+---
+# Persistent Volume Claims
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: tamv-storage-pvc
+  namespace: tamv-production
+spec:
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 1Ti
+  storageClassName: efs-sc
+
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: isabella-models-pvc
+  namespace: tamv-production
+spec:
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 500Gi
+  storageClassName: efs-sc
+
+---
+# Horizontal Pod Autoscaler for Core API
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: tamv-core-api-hpa
+  namespace: tamv-production
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: tamv-core-api
+  minReplicas: 6
+  maxReplicas: 50
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 70
+  - type: Resource
+    resource:
+      name: memory
+      target:
+        type: Utilization
+        averageUtilization: 80
+
+---
+# Horizontal Pod Autoscaler for XR Renderer
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: tamv-xr-renderer-hpa
+  namespace: tamv-production
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: tamv-xr-renderer
+  minReplicas: 8
+  maxReplicas: 100
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 75
+  - type: Resource
+    resource:
+      name: memory
+      target:
+        type: Utilization
+        averageUtilization: 85

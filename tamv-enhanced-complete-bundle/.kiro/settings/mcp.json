@@ -1,0 +1,53 @@
+{
+  "mcpServers": {
+    "stripe": {
+      "command": "uvx",
+      "args": ["stripe-mcp-server@latest"],
+      "env": {
+        "STRIPE_SECRET_KEY": "sk_test_changeme",
+        "FASTMCP_LOG_LEVEL": "ERROR"
+      },
+      "disabled": false,
+      "autoApprove": ["create_checkout_session", "create_customer", "create_subscription"]
+    },
+    "aws-knowledge": {
+      "command": "uvx",
+      "args": ["awslabs.aws-knowledge-mcp-server@latest"],
+      "env": {
+        "FASTMCP_LOG_LEVEL": "ERROR"
+      },
+      "disabled": false,
+      "autoApprove": ["search_knowledge", "get_service_info"]
+    },
+    "aws-api": {
+      "command": "uvx", 
+      "args": ["awslabs.aws-api-mcp-server@latest"],
+      "env": {
+        "AWS_REGION": "us-east-1",
+        "FASTMCP_LOG_LEVEL": "ERROR"
+      },
+      "disabled": false,
+      "autoApprove": ["describe_instances", "list_buckets"]
+    },
+    "dynamodb": {
+      "command": "uvx",
+      "args": ["awslabs.dynamodb-mcp-server@latest"],
+      "env": {
+        "AWS_REGION": "us-east-1",
+        "FASTMCP_LOG_LEVEL": "ERROR"
+      },
+      "disabled": false,
+      "autoApprove": ["query", "scan", "put_item"]
+    },
+    "serverless": {
+      "command": "uvx",
+      "args": ["awslabs.aws-serverless-mcp@latest"],
+      "env": {
+        "AWS_REGION": "us-east-1",
+        "FASTMCP_LOG_LEVEL": "ERROR"
+      },
+      "disabled": false,
+      "autoApprove": ["deploy_function", "update_function"]
+    }
+  }
+}
