@@ -14,6 +14,9 @@ import authRoutes from './routes/auth.routes';
 import userRoutes from './routes/user.routes';
 import postRoutes from './routes/post.routes';
 import feedRoutes from './routes/feed.routes';
+import identityRoutes from './routes/identity.routes';
+import msrRoutes from './routes/msr.routes';
+import governanceRoutes from './routes/governance.routes';
 
 // Middleware
 import { errorHandler, notFoundHandler } from './middleware/error.middleware';
@@ -49,6 +52,9 @@ app.use('/api/v1/auth', authRoutes);
 app.use('/api/v1/users', userRoutes);
 app.use('/api/v1/posts', postRoutes);
 app.use('/api/v1/feed', feedRoutes);
+app.use('/api/v1/identity', identityRoutes);
+app.use('/api/v1/msr', msrRoutes);
+app.use('/api/v1/governance', governanceRoutes);
 
 // 404 handler
 app.use(notFoundHandler);
