@@ -39,7 +39,7 @@ export function generateRefreshToken(payload: TokenPayload): string {
 export function verifyToken(token: string): TokenPayload {
   try {
     return jwt.verify(token, JWT_SECRET) as TokenPayload;
-  } catch (error) {
+  } catch {
     throw new Error('Invalid or expired token');
   }
 }
@@ -50,7 +50,7 @@ export function verifyToken(token: string): TokenPayload {
 export function decodeToken(token: string): TokenPayload | null {
   try {
     return jwt.decode(token) as TokenPayload;
-  } catch (error) {
+  } catch {
     return null;
   }
 }

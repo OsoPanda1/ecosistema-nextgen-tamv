@@ -17,7 +17,7 @@ export function errorHandler(
   err: AppError,
   req: Request,
   res: Response,
-  next: NextFunction
+  _next: NextFunction
 ): void {
   const statusCode = err.statusCode || 500;
   const message = err.message || 'Internal server error';
@@ -41,11 +41,7 @@ export function errorHandler(
 /**
  * 404 handler
  */
-export function notFoundHandler(
-  req: Request,
-  res: Response,
-  next: NextFunction
-): void {
+export function notFoundHandler(req: Request, res: Response, _next: NextFunction): void {
   res.status(404).json({
     error: 'Not found',
     path: req.url,

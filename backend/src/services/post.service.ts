@@ -3,7 +3,7 @@
  * Business logic for post management
  */
 
-import { query, getById, paginate, softDelete, transaction } from '../utils/database';
+import { query } from '../utils/database';
 import { Post, CreatePostDTO, UpdatePostDTO, PostWithUser } from '../models/Post';
 
 /**
@@ -117,7 +117,7 @@ export async function listPosts(
 ): Promise<{ data: PostWithUser[]; total: number; page: number; limit: number }> {
   const offset = (page - 1) * limit;
 
-  let whereClause = 'WHERE p.deleted_at IS NULL AND p.visibility = \'public\'';
+  let whereClause = "WHERE p.deleted_at IS NULL AND p.visibility = 'public'";
   const params: any[] = [];
 
   if (userId) {

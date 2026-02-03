@@ -3,7 +3,7 @@
  * Business logic for post comments
  */
 
-import { query, paginate } from '../utils/database';
+import { query } from '../utils/database';
 import { Comment, CreateCommentDTO, UpdateCommentDTO, CommentWithUser } from '../models/Comment';
 
 /**

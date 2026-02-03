@@ -7,11 +7,9 @@ import { Request, Response, NextFunction } from 'express';
 import { verifyToken, TokenPayload } from '../utils/jwt';
 
 // Extend Express Request to include user
-declare global {
-  namespace Express {
-    interface Request {
-      user?: TokenPayload;
-    }
+declare module 'express-serve-static-core' {
+  interface Request {
+    user?: TokenPayload;
   }
 }
 
@@ -19,11 +17,7 @@ declare global {
  * Require authentication
  * Verifies JWT token and attaches user to request
  */
-export function requireAuth(
-  req: Request,
-  res: Response,
-  next: NextFunction
-): void {
+export function requireAuth(req: Request, res: Response, next: NextFunction): void {
   try {
     // Get token from Authorization header
     const authHeader = req.headers.authorization;
@@ -36,12 +30,12 @@ export function requireAuth(
 
     // Verify token
     const payload = verifyToken(token);
-    
+
     // Attach user to request
     req.user = payload;
-    
+
     next();
-  } catch (error) {
+  } catch {
     res.status(401).json({ error: 'Invalid or expired token' });
   }
 }
@@ -50,11 +44,7 @@ export function requireAuth(
  * Optional authentication
  * Attaches user to request if token is valid, but doesn't require it
  */
-export function optionalAuth(
-  req: Request,
-  res: Response,
-  next: NextFunction
-): void {
+export function optionalAuth(req: Request, res: Response, next: NextFunction): void {
   try {
     const authHeader = req.headers.authorization;
     if (authHeader && authHeader.startsWith('Bearer ')) {
@@ -62,7 +52,7 @@ export function optionalAuth(
       const payload = verifyToken(token);
       req.user = payload;
     }
-  } catch (error) {
+  } catch {
     // Ignore errors for optional auth
   }
   next();

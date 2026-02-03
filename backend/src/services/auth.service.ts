@@ -7,7 +7,7 @@ import { query, transaction } from '../utils/database';
 import { hashPassword, verifyPassword } from '../utils/bcrypt';
 import { generateAccessToken, generateRefreshToken, verifyToken } from '../utils/jwt';
 import { User, CreateUserDTO } from '../models/User';
-import { Session, CreateSessionDTO } from '../models/Session';
+import { Session } from '../models/Session';
 import { sanitizeUser } from '../utils/sanitization';
 
 export interface AuthResponse {
@@ -26,19 +26,15 @@ export async function register(
 ): Promise<AuthResponse> {
   return transaction(async (client) => {
     // Check if email already exists
-    const emailCheck = await client.query(
-      'SELECT id FROM users WHERE email = $1',
-      [data.email]
-    );
+    const emailCheck = await client.query('SELECT id FROM users WHERE email = $1', [data.email]);
     if (emailCheck.rows.length > 0) {
       throw new Error('Email already registered');
     }
 
     // Check if username already exists
-    const usernameCheck = await client.query(
-      'SELECT id FROM users WHERE username = $1',
-      [data.username]
-    );
+    const usernameCheck = await client.query('SELECT id FROM users WHERE username = $1', [
+      data.username,
+    ]);
     if (usernameCheck.rows.length > 0) {
       throw new Error('Username already taken');
     }
@@ -97,10 +93,7 @@ export async function login(
   userAgent?: string
 ): Promise<AuthResponse> {
   // Get user by email
-  const result = await query<User>(
-    'SELECT * FROM users WHERE email = $1',
-    [email]
-  );
+  const result = await query<User>('SELECT * FROM users WHERE email = $1', [email]);
 
   if (result.rows.length === 0) {
     throw new Error('Invalid email or password');
@@ -138,10 +131,7 @@ export async function login(
   );
 
   // Update last login
-  await query(
-    'UPDATE users SET last_login_at = CURRENT_TIMESTAMP WHERE id = $1',
-    [user.id]
-  );
+  await query('UPDATE users SET last_login_at = CURRENT_TIMESTAMP WHERE id = $1', [user.id]);
 
   return {
     user: sanitizeUser(user),
@@ -175,10 +165,7 @@ export async function refreshAccessToken(refreshToken: string): Promise<AuthResp
   }
 
   // Get user
-  const userResult = await query<User>(
-    'SELECT * FROM users WHERE id = $1',
-    [payload.userId]
-  );
+  const userResult = await query<User>('SELECT * FROM users WHERE id = $1', [payload.userId]);
 
   if (userResult.rows.length === 0) {
     throw new Error('User not found');
@@ -200,10 +187,11 @@ export async function refreshAccessToken(refreshToken: string): Promise<AuthResp
   });
 
   // Update session
-  await query(
-    'UPDATE sessions SET token = $1, refresh_token = $2 WHERE refresh_token = $3',
-    [newAccessToken, newRefreshToken, refreshToken]
-  );
+  await query('UPDATE sessions SET token = $1, refresh_token = $2 WHERE refresh_token = $3', [
+    newAccessToken,
+    newRefreshToken,
+    refreshToken,
+  ]);
 
   return {
     user: sanitizeUser(user),
