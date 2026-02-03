@@ -1,0 +1,43 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:16-alpine
+    container_name: tamv-postgres
+    environment:
+      POSTGRES_DB: tamv
+      POSTGRES_USER: tamv
+      POSTGRES_PASSWORD: tamv123
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./backend/schema.sql:/docker-entrypoint-initdb.d/schema.sql
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U tamv"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Backend API
+  backend:
+    build: ./backend
+    container_name: tamv-backend
+    ports:
+      - "3000:3000"
+    environment:
+      DATABASE_URL: postgresql://tamv:tamv123@postgres:5432/tamv
+      JWT_SECRET: tamv-secret-key-change-in-production
+      PORT: 3000
+      NODE_ENV: development
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - ./backend:/app
+      - /app/node_modules
+    command: npm run dev
+
+volumes:
+  pgdata:

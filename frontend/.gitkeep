@@ -1,0 +1,11 @@
+# Frontend directory
+React/Next.js frontend application for TAMV.
+
+## Structure
+- src/ - Source code
+- public/ - Static assets
+- components/ - React components
+- pages/ - Application pages
+- styles/ - CSS/styling files
+- utils/ - Utility functions
+- types/ - TypeScript type definitions

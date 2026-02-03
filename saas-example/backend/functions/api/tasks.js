@@ -1,64 +1,53 @@
-const AWS = require('aws-sdk');
-const { v4: uuidv4 } = require('uuid');
+// Multi-tenant Task API Handler
 
-const dynamodb = new AWS.DynamoDB.DocumentClient();
-const eventbridge = new AWS.EventBridge();
+const { DynamoDBClient } = require('@aws-sdk/client-dynamodb');
+const { DynamoDBDocumentClient, QueryCommand, PutCommand, GetCommand } = require('@aws-sdk/lib-dynamodb');
 
-const TABLE_NAME = process.env.TASKS_TABLE || 'tasks-table';
+const client = new DynamoDBClient({});
+const docClient = DynamoDBDocumentClient.from(client);
 
-/**
- * Multi-tenant Task API Handler
- * Demonstrates core SaaS patterns: tenant isolation, RBAC, usage tracking
- */
+const TABLE_NAME = process.env.TABLE_NAME;
+
 exports.handler = async (event) => {
+  // Step 1: Extract tenant context from authorizer
+  const tenantId = event.requestContext.authorizer.tenantId;
+  const userId = event.requestContext.authorizer.userId;
+  const roles = JSON.parse(event.requestContext.authorizer.roles);
+  
+  if (!tenantId) {
+    return response(403, { error: { code: 'MISSING_TENANT', message: 'Tenant context required' } });
+  }
+
+  const method = event.httpMethod;
+  const path = event.path;
+
   try {
-    // STEP 1: Extract tenant context from authorizer (NEVER trust request body)
-    const tenantId = event.requestContext.authorizer.tenantId;
-    const userId = event.requestContext.authorizer.userId;
-    const roles = JSON.parse(event.requestContext.authorizer.roles || '["user"]');
+    // Route to appropriate handler
+    if (method === 'GET' && path === '/tasks') {
+      return await listTasks(tenantId, event.queryStringParameters);
+    }
     
-    if (!tenantId) {
-      return errorResponse(403, 'MISSING_TENANT', 'Tenant context required');
+    if (method === 'POST' && path === '/tasks') {
+      return await createTask(tenantId, userId, JSON.parse(event.body));
+    }
+    
+    if (method === 'GET' && path.startsWith('/tasks/')) {
+      const taskId = path.split('/')[2];
+      return await getTask(tenantId, taskId);
     }
 
-    // STEP 2: Route to appropriate handler
-    const method = event.httpMethod;
-    const pathParameters = event.pathParameters || {};
-    
-    switch (method) {
-      case 'GET':
-        if (pathParameters.taskId) {
-          return await getTask(tenantId, pathParameters.taskId);
-        } else {
-          return await listTasks(tenantId, event.queryStringParameters || {});
-        }
-      
-      case 'POST':
-        return await createTask(tenantId, userId, JSON.parse(event.body || '{}'));
-      
-      case 'PUT':
-        return await updateTask(tenantId, userId, pathParameters.taskId, JSON.parse(event.body || '{}'), roles);
-      
-      case 'DELETE':
-        return await deleteTask(tenantId, pathParameters.taskId, roles);
-      
-      default:
-        return errorResponse(405, 'METHOD_NOT_ALLOWED', 'Method not supported');
-    }
-
+    return response(404, { error: { code: 'NOT_FOUND', message: 'Endpoint not found' } });
   } catch (error) {
-    console.error('Task API error:', error);
-    return errorResponse(500, 'INTERNAL_ERROR', 'Internal server error');
+    console.error('Error:', { tenantId, error: error.message });
+    return response(500, { error: { code: 'INTERNAL_ERROR', message: 'An error occurred' } });
   }
 };
 
-/**
- * List tasks for tenant with pagination and filtering
- */
+// List tasks for tenant
 async function listTasks(tenantId, queryParams) {
-  const { status, page = 1, pageSize = 20 } = queryParams;
+  const status = queryParams?.status;
   
-  // CRITICAL: All queries scoped to tenant
+  // Query with tenant prefix - ensures tenant isolation
   const params = {
     TableName: TABLE_NAME,
     KeyConditionExpression: 'pk = :pk',
@@ -66,7 +55,7 @@ async function listTasks(tenantId, queryParams) {
       ':pk': `${tenantId}#Task`
     }
   };
-
+  
   // Add status filter if provided
   if (status) {
     params.FilterExpression = '#status = :status';
@@ -74,227 +63,99 @@ async function listTasks(tenantId, queryParams) {
     params.ExpressionAttributeValues[':status'] = status;
   }
 
-  const result = await dynamodb.query(params).promise();
+  const result = await docClient.send(new QueryCommand(params));
   
-  // Simple pagination (in production, use DynamoDB pagination tokens)
-  const startIndex = (page - 1) * pageSize;
-  const endIndex = startIndex + parseInt(pageSize);
-  const paginatedTasks = result.Items.slice(startIndex, endIndex);
-
-  return {
-    statusCode: 200,
-    headers: corsHeaders(),
-    body: JSON.stringify({
-      tasks: paginatedTasks.map(formatTask),
-      pagination: {
-        page: parseInt(page),
-        pageSize: parseInt(pageSize),
-        total: result.Items.length,
-        hasNext: endIndex < result.Items.length
-      }
-    })
-  };
+  return response(200, {
+    tasks: result.Items.map(item => ({
+      id: item.sk.split('#')[1],
+      tenantId: item.tenantId,
+      title: item.title,
+      description: item.description,
+      status: item.status,
+      createdAt: item.createdAt,
+      updatedAt: item.updatedAt
+    }))
+  });
 }
 
-/**
- * Get single task by ID (tenant-scoped)
- */
-async function getTask(tenantId, taskId) {
-  const params = {
-    TableName: TABLE_NAME,
-    Key: {
-      pk: `${tenantId}#Task`,
-      sk: `Task#${taskId}`
-    }
-  };
-
-  const result = await dynamodb.get(params).promise();
-  
-  if (!result.Item) {
-    return errorResponse(404, 'TASK_NOT_FOUND', 'Task not found');
+// Create new task
+async function createTask(tenantId, userId, body) {
+  // Step 3: Validate parameters
+  if (!body.title) {
+    return response(400, { error: { code: 'INVALID_INPUT', message: 'Title is required' } });
   }
 
-  return {
-    statusCode: 200,
-    headers: corsHeaders(),
-    body: JSON.stringify(formatTask(result.Item))
-  };
-}
-
-/**
- * Create new task and track usage for billing
- */
-async function createTask(tenantId, userId, taskData) {
-  const { title, description, priority = 'medium', dueDate } = taskData;
-  
-  if (!title || title.length > 200) {
-    return errorResponse(400, 'INVALID_TITLE', 'Title is required and must be under 200 characters');
-  }
-
-  const taskId = uuidv4();
+  const taskId = generateId();
   const now = new Date().toISOString();
   
-  const task = {
-    pk: `${tenantId}#Task`,
-    sk: `Task#${taskId}`,
+  // Step 5: Prefix database operations with tenant ID
+  const item = {
+    pk: `${tenantId}#Task`,           // Tenant-scoped partition key
+    sk: `Task#${taskId}`,             // Sort key
+    tenantId: tenantId,
     id: taskId,
-    title,
-    description: description || '',
+    title: body.title,
+    description: body.description || '',
     status: 'pending',
-    priority,
     createdBy: userId,
     createdAt: now,
-    updatedAt: now,
-    dueDate: dueDate || null,
-    // GSI for time-based queries
-    GSI1PK: tenantId,
-    GSI1SK: `Task#${now}`
+    updatedAt: now
   };
 
-  // Save task
-  await dynamodb.put({
+  await docClient.send(new PutCommand({
     TableName: TABLE_NAME,
-    Item: task
-  }).promise();
+    Item: item
+  }));
 
-  // STEP 3: Track usage for billing (publish to EventBridge)
-  await trackUsage(tenantId, userId, 'task_created', {
-    taskId,
-    timestamp: now
+  return response(201, {
+    id: taskId,
+    tenantId: tenantId,
+    title: item.title,
+    description: item.description,
+    status: item.status,
+    createdAt: item.createdAt,
+    updatedAt: item.updatedAt
   });
-
-  return {
-    statusCode: 201,
-    headers: corsHeaders(),
-    body: JSON.stringify(formatTask(task))
-  };
 }
 
-/**
- * Update task (with permission check)
- */
-async function updateTask(tenantId, userId, taskId, updates, roles) {
-  // Get existing task
-  const existing = await dynamodb.get({
+// Get specific task
+async function getTask(tenantId, taskId) {
+  // Always scope to tenant
+  const result = await docClient.send(new GetCommand({
     TableName: TABLE_NAME,
     Key: {
       pk: `${tenantId}#Task`,
       sk: `Task#${taskId}`
     }
-  }).promise();
+  }));
 
-  if (!existing.Item) {
-    return errorResponse(404, 'TASK_NOT_FOUND', 'Task not found');
+  if (!result.Item) {
+    return response(404, { error: { code: 'NOT_FOUND', message: 'Task not found' } });
   }
 
-  // STEP 4: Check permissions (users can only edit their own tasks, admins can edit any)
-  const isAdmin = roles.includes('admin');
-  const isOwner = existing.Item.createdBy === userId;
-  
-  if (!isAdmin && !isOwner) {
-    return errorResponse(403, 'FORBIDDEN', 'You can only edit your own tasks');
-  }
-
-  // Update task
-  const updatedTask = {
-    ...existing.Item,
-    ...updates,
-    updatedAt: new Date().toISOString()
-  };
-
-  await dynamodb.put({
-    TableName: TABLE_NAME,
-    Item: updatedTask
-  }).promise();
-
-  return {
-    statusCode: 200,
-    headers: corsHeaders(),
-    body: JSON.stringify(formatTask(updatedTask))
-  };
+  return response(200, {
+    id: result.Item.id,
+    tenantId: result.Item.tenantId,
+    title: result.Item.title,
+    description: result.Item.description,
+    status: result.Item.status,
+    createdAt: result.Item.createdAt,
+    updatedAt: result.Item.updatedAt
+  });
 }
 
-/**
- * Delete task (admin only)
- */
-async function deleteTask(tenantId, taskId, roles) {
-  // STEP 5: Role-based access control
-  if (!roles.includes('admin')) {
-    return errorResponse(403, 'FORBIDDEN', 'Only admins can delete tasks');
-  }
-
-  await dynamodb.delete({
-    TableName: TABLE_NAME,
-    Key: {
-      pk: `${tenantId}#Task`,
-      sk: `Task#${taskId}`
-    }
-  }).promise();
-
-  return {
-    statusCode: 204,
-    headers: corsHeaders(),
-    body: ''
-  };
-}
-
-/**
- * Track usage events for billing
- */
-async function trackUsage(tenantId, userId, eventType, metadata) {
-  const usageEvent = {
-    Source: 'task-management-saas',
-    DetailType: 'Usage Event',
-    Detail: JSON.stringify({
-      tenantId,
-      userId,
-      eventType,
-      timestamp: new Date().toISOString(),
-      metadata
-    })
-  };
-
-  try {
-    await eventbridge.putEvents({
-      Entries: [usageEvent]
-    }).promise();
-    
-    console.log(`Usage tracked: ${eventType} for tenant ${tenantId}`);
-  } catch (error) {
-    console.error('Failed to track usage:', error);
-    // Don't fail the request if usage tracking fails
-  }
-}
-
-/**
- * Format task for API response (remove internal fields)
- */
-function formatTask(task) {
-  const { pk, sk, GSI1PK, GSI1SK, ...publicTask } = task;
-  return publicTask;
-}
-
-/**
- * Standard error response
- */
-function errorResponse(statusCode, code, message) {
+// Helper functions
+function response(statusCode, body) {
   return {
     statusCode,
-    headers: corsHeaders(),
-    body: JSON.stringify({
-      error: { code, message }
-    })
+    headers: {
+      'Content-Type': 'application/json',
+      'Access-Control-Allow-Origin': '*'
+    },
+    body: JSON.stringify(body)
   };
 }
 
-/**
- * CORS headers for browser requests
- */
-function corsHeaders() {
-  return {
-    'Content-Type': 'application/json',
-    'Access-Control-Allow-Origin': '*',
-    'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
-    'Access-Control-Allow-Headers': 'Content-Type, Authorization'
-  };
+function generateId() {
+  return Date.now().toString(36) + Math.random().toString(36).substr(2);
 }

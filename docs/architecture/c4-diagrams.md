@@ -1,4 +1,5 @@
 # DIAGRAMAS C4 TAMV
+
 ## Arquitectura en 4 Niveles
 
 **Estado:** Documentación arquitectónica textual  
@@ -433,71 +434,73 @@ tamv-federation/
 export class DIDRegistry {
   private db: Database;
   private crypto: CryptoService;
-  
+
   async createDID(publicKey: Uint8Array): Promise<DIDDocument> {
     // Validar clave pública
     if (!this.crypto.validateEd25519PublicKey(publicKey)) {
       throw new Error('Invalid Ed25519 public key');
     }
-    
+
     // Generar DID
     const did = this.generateDID(publicKey);
-    
+
     // Crear documento DID
     const document: DIDDocument = {
       '@context': ['https://www.w3.org/ns/did/v1'],
       id: did,
-      verificationMethod: [{
-        id: `${did}#key-1`,
-        type: 'Ed25519VerificationKey2020',
-        controller: did,
-        publicKeyMultibase: this.crypto.encodeMultibase(publicKey)
-      }],
-      authentication: [`${did}#key-1`]
+      verificationMethod: [
+        {
+          id: `${did}#key-1`,
+          type: 'Ed25519VerificationKey2020',
+          controller: did,
+          publicKeyMultibase: this.crypto.encodeMultibase(publicKey),
+        },
+      ],
+      authentication: [`${did}#key-1`],
     };
-    
+
     // Almacenar en base de datos
     await this.db.storeDIDDocument(did, document);
-    
+
     // Registrar en audit log
     await this.auditLog.record({
       type: 'DID_CREATED',
       did,
       timestamp: new Date(),
-      hash: this.crypto.hash(document)
+      hash: this.crypto.hash(document),
     });
-    
+
     return document;
   }
-  
+
   async resolveDID(did: string): Promise<DIDDocument | null> {
     // Validar formato DID
     if (!this.validateDIDFormat(did)) {
       throw new Error('Invalid DID format');
     }
-    
+
     // Buscar en base de datos
     const document = await this.db.getDIDDocument(did);
-    
+
     if (!document) {
       return null;
     }
-    
+
     // Verificar integridad
     const isValid = await this.verifyDocumentIntegrity(document);
     if (!isValid) {
       throw new Error('DID document integrity violation');
     }
-    
+
     return document;
   }
-  
+
   private generateDID(publicKey: Uint8Array): string {
     const hash = this.crypto.sha256(publicKey);
     const encoded = this.crypto.base58Encode(hash);
     return `did:tamv:${encoded}`;
   }
-  
+
   private validateDIDFormat(did: string): boolean {
     const pattern = /^did:tamv:[a-zA-Z0-9]{43}$/;
     return pattern.test(did);
@@ -528,30 +531,30 @@ export const SYSTEM_ROLES: Record<string, Role> = {
     permissions: [
       { resource: 'did', action: 'create' },
       { resource: 'did', action: 'read' },
-      { resource: 'did', action: 'update', conditions: { owner: true } }
-    ]
+      { resource: 'did', action: 'update', conditions: { owner: true } },
+    ],
   },
   'economic-participant': {
     name: 'economic-participant',
     permissions: [
       { resource: 'transaction', action: 'create', conditions: { sender: true } },
-      { resource: 'balance', action: 'read', conditions: { owner: true } }
-    ]
+      { resource: 'balance', action: 'read', conditions: { owner: true } },
+    ],
   },
   'governance-voter': {
     name: 'governance-voter',
     permissions: [
       { resource: 'proposal', action: 'read' },
-      { resource: 'vote', action: 'create', conditions: { eligible: true } }
-    ]
+      { resource: 'vote', action: 'create', conditions: { eligible: true } },
+    ],
   },
-  'auditor': {
+  auditor: {
     name: 'auditor',
     permissions: [
       { resource: 'audit-log', action: 'read' },
-      { resource: 'compliance-report', action: 'create' }
-    ]
-  }
+      { resource: 'compliance-report', action: 'create' },
+    ],
+  },
 };
 
 // Función de verificación de permisos
@@ -564,21 +567,22 @@ export function hasPermission(
   for (const roleName of userRoles) {
     const role = SYSTEM_ROLES[roleName];
     if (!role) continue;
-    
+
     for (const permission of role.permissions) {
       if (permission.resource === resource && permission.action === action) {
         // Verificar condiciones
         if (permission.conditions) {
-          const conditionsMet = Object.entries(permission.conditions)
-            .every(([key, value]) => context[key] === value);
+          const conditionsMet = Object.entries(permission.conditions).every(
+            ([key, value]) => context[key] === value
+          );
           if (!conditionsMet) continue;
         }
-        
+
         return true;
       }
     }
   }
-  
+
   return false;
 }
 ```

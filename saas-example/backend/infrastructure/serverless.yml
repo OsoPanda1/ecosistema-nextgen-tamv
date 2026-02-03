@@ -1,74 +1,102 @@
-service: task-management-saas
+service: task-manager-api
 
 provider:
   name: aws
   runtime: nodejs18.x
   region: us-east-1
-  stage: ${opt:stage, 'dev'}
-  
   environment:
-    TASKS_TABLE: ${self:service}-${self:provider.stage}-tasks
-    JWT_SECRET: ${env:JWT_SECRET, 'your-secret-key'}
-  
-  iamRoleStatements:
-    - Effect: Allow
-      Action:
-        - dynamodb:Query
-        - dynamodb:GetItem
-        - dynamodb:PutItem
-        - dynamodb:UpdateItem
-        - dynamodb:DeleteItem
-      Resource:
-        - "arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.TASKS_TABLE}"
-        - "arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.TASKS_TABLE}/index/*"
-    - Effect: Allow
-      Action:
-        - events:PutEvents
-      Resource: "*"
+    TABLE_NAME: ${self:service}-${self:provider.stage}-tasks
+    JWT_SECRET: ${env:JWT_SECRET}
+  iam:
+    role:
+      statements:
+        - Effect: Allow
+          Action:
+            - dynamodb:Query
+            - dynamodb:GetItem
+            - dynamodb:PutItem
+            - dynamodb:UpdateItem
+            - dynamodb:DeleteItem
+          Resource:
+            - !GetAtt TasksTable.Arn
 
 functions:
-  # Lambda Authorizer - validates JWT and injects tenant context
   authorizer:
     handler: functions/authorizer/index.handler
-    
-  # Task API endpoints
+
+  auth:
+    handler: functions/api/auth.handler
+    events:
+      - http:
+          path: /auth/signup
+          method: post
+          cors: true
+      - http:
+          path: /auth/login
+          method: post
+          cors: true
+      - http:
+          path: /auth/refresh
+          method: post
+          cors: true
+
+  users:
+    handler: functions/api/users.handler
+    events:
+      - http:
+          path: /users
+          method: get
+          authorizer:
+            name: authorizer
+            resultTtlInSeconds: 300
+      - http:
+          path: /users
+          method: post
+          authorizer:
+            name: authorizer
+            resultTtlInSeconds: 300
+      - http:
+          path: /users/{userId}
+          method: get
+          authorizer:
+            name: authorizer
+            resultTtlInSeconds: 300
+      - http:
+          path: /users/{userId}
+          method: put
+          authorizer:
+            name: authorizer
+            resultTtlInSeconds: 300
+
   tasks:
     handler: functions/api/tasks.handler
     events:
       - http:
           path: /tasks
           method: get
-          authorizer: authorizer
-          cors: true
+          authorizer:
+            name: authorizer
+            resultTtlInSeconds: 300
       - http:
           path: /tasks
           method: post
-          authorizer: authorizer
-          cors: true
+          authorizer:
+            name: authorizer
+            resultTtlInSeconds: 300
       - http:
           path: /tasks/{taskId}
           method: get
-          authorizer: authorizer
-          cors: true
-      - http:
-          path: /tasks/{taskId}
-          method: put
-          authorizer: authorizer
-          cors: true
-      - http:
-          path: /tasks/{taskId}
-          method: delete
-          authorizer: authorizer
-          cors: true
+          authorizer:
+            name: authorizer
+            resultTtlInSeconds: 300
 
 resources:
   Resources:
-    # DynamoDB table with tenant isolation design
     TasksTable:
       Type: AWS::DynamoDB::Table
       Properties:
-        TableName: ${self:provider.environment.TASKS_TABLE}
-        BillingMode: PAY_PER_REQUEST  # Cost-efficient for SaaS
+        TableName: ${self:provider.environment.TABLE_NAME}
+        BillingMode: PAY_PER_REQUEST
         AttributeDefinitions:
           - AttributeName: pk
             AttributeType: S
@@ -77,6 +105,10 @@ resources:
           - AttributeName: GSI1PK
             AttributeType: S
           - AttributeName: GSI1SK
+            AttributeType: S
+          - AttributeName: GSI2PK
+            AttributeType: S
+          - AttributeName: GSI2SK
             AttributeType: S
         KeySchema:
           - AttributeName: pk
@@ -92,14 +124,11 @@ resources:
                 KeyType: RANGE
             Projection:
               ProjectionType: ALL
-        PointInTimeRecoverySpecification:
-          PointInTimeRecoveryEnabled: true
-        SSESpecification:
-          SSEEnabled: true
-
-plugins:
-  - serverless-offline
-
-custom:
-  serverless-offline:
-    httpPort: 3001
+          - IndexName: GSI2
+            KeySchema:
+              - AttributeName: GSI2PK
+                KeyType: HASH
+              - AttributeName: GSI2SK
+                KeyType: RANGE
+            Projection:
+              ProjectionType: ALL

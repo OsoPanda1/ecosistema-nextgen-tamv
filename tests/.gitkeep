@@ -1,0 +1,8 @@
+# Tests directory
+This directory contains all test files for the TAMV project.
+
+## Structure
+- unit/ - Unit tests for individual functions and modules
+- integration/ - Integration tests for API endpoints and services
+- property/ - Property-based tests using fast-check
+- e2e/ - End-to-end tests for critical user flows

@@ -1,4 +1,5 @@
 {
     "kiroAgent.configureMCP": "Enabled",
-    "workbench.editor.limit.enabled": true
+    "workbench.editor.limit.enabled": true,
+    "typescript.autoClosingTags": false
 }

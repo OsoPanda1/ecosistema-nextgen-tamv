@@ -1,113 +1,65 @@
-import { useState, useEffect, createContext, useContext } from 'react';
+import { useState, useEffect } from 'react';
 
 interface User {
   id: string;
   email: string;
-  name: string;
-  roles: string[];
   tenantId: string;
+  roles: string[];
+  fullName?: string;
 }
 
-interface AuthContextType {
-  user: User | null;
-  token: string | null;
-  loading: boolean;
-  login: (email: string, password: string) => Promise<void>;
-  logout: () => void;
-}
-
-// Create context for authentication
-export const AuthContext = createContext<AuthContextType | null>(null);
-
-/**
- * Hook to access authentication context
- */
-export const useAuth = () => {
-  const context = useContext(AuthContext);
-  
-  if (!context) {
-    throw new Error('useAuth must be used within an AuthProvider');
-  }
-  
-  return context;
-};
-
-/**
- * Custom hook for authentication management
- * In production, integrate with Auth0, AWS Cognito, or similar
- */
-export const useAuthState = (): AuthContextType => {
+export function useAuth() {
   const [user, setUser] = useState<User | null>(null);
-  const [token, setToken] = useState<string | null>(null);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Check for existing session on app load
-    const initializeAuth = async () => {
+    // Check for existing token
+    const token = localStorage.getItem('token');
+    const storedUser = localStorage.getItem('user');
+    
+    if (token && storedUser) {
       try {
-        const savedToken = localStorage.getItem('auth_token');
-        if (savedToken) {
-          // In real app, validate token with backend
-          // For demo, we'll simulate a valid session
-          const mockUser: User = {
-            id: 'user-456',
-            email: 'john@acme.com',
-            name: 'John Doe',
-            roles: ['user', 'admin'],
-            tenantId: 'tenant-123'
-          };
-          
-          setUser(mockUser);
-          setToken(savedToken);
-        }
+        setUser(JSON.parse(storedUser));
+        setIsAuthenticated(true);
       } catch (error) {
-        console.error('Failed to initialize auth:', error);
-        localStorage.removeItem('auth_token');
-      } finally {
-        setLoading(false);
+        console.error('Failed to parse stored user:', error);
+        logout();
       }
-    };
-
-    initializeAuth();
+    }
+    
+    setLoading(false);
   }, []);
 
-  const login = async (email: string, password: string) => {
-    try {
-      // In real app, call authentication API
-      // For demo, simulate successful login
-      if (email && password) {
-        const mockToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ1c2VyLTQ1NiIsImVtYWlsIjoiam9obkBhY21lLmNvbSIsInRlbmFudElkIjoidGVuYW50LTEyMyIsInJvbGVzIjpbInVzZXIiLCJhZG1pbiJdLCJpYXQiOjE3MDk1NTM2MDAsImV4cCI6MTcwOTY0MDAwMH0.demo-signature';
-        
-        const mockUser: User = {
-          id: 'user-456',
-          email,
-          name: 'John Doe',
-          roles: ['user', 'admin'],
-          tenantId: 'tenant-123'
-        };
-
-        setUser(mockUser);
-        setToken(mockToken);
-        localStorage.setItem('auth_token', mockToken);
-      } else {
-        throw new Error('Invalid credentials');
-      }
-    } catch (error) {
-      throw new Error('Login failed');
+  async function getToken(): Promise<string> {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      throw new Error('No token available');
     }
-  };
+    return token;
+  }
 
-  const logout = () => {
+  function login(token: string, userData: User) {
+    localStorage.setItem('token', token);
+    localStorage.setItem('user', JSON.stringify(userData));
+    setUser(userData);
+    setIsAuthenticated(true);
+  }
+
+  function logout() {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    localStorage.removeItem('tenant');
     setUser(null);
-    setToken(null);
-    localStorage.removeItem('auth_token');
-  };
+    setIsAuthenticated(false);
+  }
 
   return {
     user,
-    token,
+    isAuthenticated,
     loading,
+    getToken,
     login,
     logout
   };
-};
+}

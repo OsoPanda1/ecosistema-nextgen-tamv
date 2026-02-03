@@ -1,0 +1,7 @@
+# Database directory
+Database schemas, migrations, and seed data.
+
+## Structure
+- migrations/ - Database migration files
+- seeds/ - Seed data for development and testing
+- schemas/ - Database schema definitions
