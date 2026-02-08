@@ -1,0 +1,115 @@
+/**
+ * Economy Controller
+ */
+
+import { Request, Response, NextFunction } from 'express';
+import * as economyService from '../services/economy.service';
+
+export async function createLedgerEntryHandler(
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> {
+  try {
+    const entry = await economyService.createLedgerEntry({
+      userId: req.body.userId,
+      amount: req.body.amount,
+      currency: req.body.currency,
+      entryType: req.body.entryType,
+      reference: req.body.reference,
+      metadata: req.body.metadata,
+    });
+
+    res.status(201).json(entry);
+  } catch (error) {
+    next(error);
+  }
+}
+
+export async function listLedgerEntriesHandler(
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> {
+  try {
+    const limit = parseInt(req.query.limit as string) || 20;
+    const offset = parseInt(req.query.offset as string) || 0;
+
+    const entries = await economyService.listLedgerEntries(limit, offset);
+
+    res.json(entries);
+  } catch (error) {
+    next(error);
+  }
+}
+
+export async function upsertTokenBalanceHandler(
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> {
+  try {
+    const balance = await economyService.upsertTokenBalance({
+      userId: req.body.userId,
+      tokenType: req.body.tokenType,
+      balance: req.body.balance,
+    });
+
+    res.status(201).json(balance);
+  } catch (error) {
+    next(error);
+  }
+}
+
+export async function listTokenBalancesHandler(
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> {
+  try {
+    const limit = parseInt(req.query.limit as string) || 20;
+    const offset = parseInt(req.query.offset as string) || 0;
+
+    const balances = await economyService.listTokenBalances(limit, offset);
+
+    res.json(balances);
+  } catch (error) {
+    next(error);
+  }
+}
+
+export async function createMembershipHandler(
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> {
+  try {
+    const membership = await economyService.createMembership({
+      userId: req.body.userId,
+      tier: req.body.tier,
+      status: req.body.status,
+      endsAt: req.body.endsAt,
+    });
+
+    res.status(201).json(membership);
+  } catch (error) {
+    next(error);
+  }
+}
+
+export async function listMembershipsHandler(
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> {
+  try {
+    const limit = parseInt(req.query.limit as string) || 20;
+    const offset = parseInt(req.query.offset as string) || 0;
+
+    const memberships = await economyService.listMemberships(limit, offset);
+
+    res.json(memberships);
+  } catch (error) {
+    next(error);
+  }
+}
