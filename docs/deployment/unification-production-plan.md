@@ -114,6 +114,14 @@ Each subsystem must have a defined API surface, deployment unit, and configurati
 3. **Confirm canonical commands** in `README.md`.
 4. **Finalize deployment scripts** and a single deploy guide.
 
+## 5.1 Consolidation summary (from prior analyses)
+
+- **Duplicate analysis**: detected overlapping documentation and multiple partial project bundles.
+- **Quality scoring**: ranked sources by recency, completeness, and code quality to determine the canonical base.
+- **Merge strategy**: file‑level merge with conflict resolution and archival of superseded content.
+
+The current repository is the canonical source of truth; all other duplicates should be archived or removed once validated.
+
 ## 6) Known Limitations
 
 - This plan reflects **only** the current repository contents. External GitHub repositories or profile data were not accessible from the local workspace, so the unification strategy assumes this repository is the designated canonical home.

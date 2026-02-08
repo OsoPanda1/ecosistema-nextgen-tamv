@@ -63,6 +63,30 @@
 
 ---
 
+## 2.1 Capas canónicas (L0–L7) y núcleo inmortal
+
+- **L0 — Doctrina & Ética:** límites no negociables y reglas TAMV.
+- **L1 — Memoria & Registro:** MSR + BookPI como trazabilidad civilizatoria.
+- **L2 — Protocolos Controlados:** EOCT/Isabella + ciclo de vida de decisiones.
+- **L3 — Guardianía & Monitoreo:** evaluación de riesgos y alertas.
+- **L4 — XR/VR/3D/4D:** traducción visual de eventos y DreamSpaces.
+- **L5 — Servicios de Dominio:** identidad, social, economía y membresías.
+- **L6 — Shell UX:** experiencias web/XR y navegación civil.
+- **L7 — Quantum‑Inspired:** orquestación probabilística y simulación ética.
+
+**Núcleo inmortal:** bootstrap autónomo post‑despliegue con auto‑recuperación y auditoría continua.
+
+---
+
+## 2.2 Resumen C4 (Contexto, Contenedores, Componentes, Código)
+
+**Contexto:** TAMV conecta usuarios, creadores y entidades reguladas con un ecosistema federado de servicios sociales, XR y economía ética.  
+**Contenedores:** API Gateway + servicios de identidad, economía, XR, seguridad, memoria y IA ética.  
+**Componentes clave:** motor social, motor de contenidos, guardianía, EOCT/Isabella, MSR/BookPI, DreamSpaces.  
+**Código:** monorepo federado con módulos separados por dominio y contratos explícitos.
+
+---
+
 ## 3. Componentes Principales y Funcionalidades
 
 ### 3.1 Sistema de Gestión Térmica Inteligente (DM-X4™)

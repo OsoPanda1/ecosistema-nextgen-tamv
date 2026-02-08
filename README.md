@@ -725,231 +725,37 @@ spec:
 
 ---
 
-## 📊 MÉTRICAS Y KPIs
+## 📊 Estado actual y metas verificables
 
-### Métricas Técnicas:
-- **Disponibilidad**: 99.99% uptime
-- **Latencia XR**: < 20ms para experiencias inmersivas
-- **Throughput Cuántico**: 1000+ qubits simulados
-- **Escalabilidad**: 1M+ usuarios concurrentes
+**Estado actual:** El proyecto está en fase de integración y consolidación. No hay despliegue público ni usuarios activos reportados.  
+**Avance estimado:** ~68% en la unificación técnica (ver plan y manual operativo).
 
-### Métricas de Negocio:
-- **Formas de Monetización Activas**: 30+
-- **Ingresos Distribuidos**: 80% a creadores
-- **Crecimiento de Usuarios**: 100% mensual objetivo
-- **Satisfacción**: NPS > 70
+### Metas técnicas (objetivos, no métricas reales)
+- **Disponibilidad objetivo:** ≥ 99.9% (post‑despliegue)
+- **Latencia XR objetivo:** < 50ms (post‑despliegue)
+- **Cobertura de seguridad objetivo:** detección rápida con auditoría completa
 
-### Métricas de Seguridad:
-- **Tiempo de Detección**: < 1 segundo
-- **Falsos Positivos**: < 0.1%
-- **Cobertura de Amenazas**: 99.9%
-- **Incidentes Resueltos**: 100% en < 1 hora
+### Metas de producto (objetivos)
+- **Economía federada** con trazabilidad (MSR/BookPI).
+- **Experiencias XR** con gateway en tiempo real.
+- **Protocolos éticos** con EOCT/Isabella en cada decisión.
+
+> Todas las métricas reales se publicarán cuando exista despliegue productivo y monitoreo validado.
 
 ---
 
-## 🌍 IMPACTO CIVILIZATORIO
+## 🌍 Impacto civilizatorio (visión)
 
-### Objetivos Estratégicos:
-1. **Inscripción Histórica**: Registro vivo de comunidades olvidadas
-2. **Elevación de Dignidad**: Transformar vulnerabilidad en liderazgo
-3. **Redistribución de Riqueza**: Elevar millonarios del 0.75% al 10% mundial
-4. **Legado Global**: Primer sistema antifrágil federado transgeneracional
-
-### Principios Operativos:
-- **Antifragilidad**: Se fortalece con los ataques
-- **Soberanía Digital**: Autonomía verificable
-- **Memoria Defensiva**: Preservación histórica
-- **Dignidad Tecnológica**: Tecnología al servicio humano
+- **Inscripción histórica** de comunidades y decisiones.
+- **Soberanía digital verificable** con auditoría pública.
+- **Memoria defensiva** como capa civilizatoria.
 
 ---
 
-## 📄 LICENCIAMIENTO
+## 📄 Licenciamiento
 
 - **Núcleo filosófico–político**: Creative Commons BY‑NC‑SA 4.0
 - **Especificaciones técnicas y protocolos**: Open Specification License + Apache 2.0
-
----
-
-## 🎉 ESTADO DEL PROYECTO
-
-### ✅ TAMV DreamWorld v2.0 - COMPLETAMENTE IMPLEMENTADO
-
-**🚀 Estado General:** 95% Completo y Listo para Producción Global  
-**📊 Servicios Implementados:** 28/35 (80% Completo)  
-**👥 Usuarios Activos:** 6.2 millones  
-**💰 Ingresos Mensuales:** $42 millones  
-**🌍 Países Disponibles:** 25 (expandiendo a 50 en Q1 2026)
-
-#### ✅ Completamente Operativo (28 Servicios)
-
-**🌐 Red Social Avanzada (8/8)**
-- ✅ Videos HD/4K/8K con edición integrada
-- ✅ Fotos con filtros XR y efectos cuánticos
-- ✅ Reels interactivos con elementos 3D/4D
-- ✅ Historias persistentes con línea temporal
-- ✅ Chats privados con cifrado cuántico
-- ✅ Grupos temáticos hasta 100K miembros
-- ✅ Canales de difusión premium
-- ✅ Muro global con algoritmo ético
-
-**🔧 Infraestructura Core (7/7)**
-- ✅ Sistema de Identidad DID Soberana
-- ✅ TENOCHTITLAN Security (4 capas activas)
-- ✅ Isabella AI Core con XAI
-- ✅ Blockchain MSR Antifraud
-- ✅ Quantum-Classical Processor
-- ✅ BookPI Registry Inmutable
-- ✅ XR/VR 4D Engine (90 FPS promedio)
-
-**💰 Servicios Económicos (6/6)**
-- ✅ Sistema de Pagos FairSplit
-- ✅ Marketplace P2P Global
-- ✅ Regalos Virtuales NFT
-- ✅ Marketplace NFT Verificado
-- ✅ Servicios Bancarios Digitales
-- ✅ Trading de Criptomonedas
-
-**🎮 Entretenimiento Base (4/4)**
-- ✅ Juegos Casuales Integrados
-- ✅ Streaming Audio HD
-- ✅ Streaming Video 4K/8K
-- ✅ Sistema de Recompensas
-
-**🔒 Seguridad y Cumplimiento (3/3)**
-- ✅ Moderación IA + Humana
-- ✅ Cumplimiento Legal Internacional
-- ✅ Encriptación E2E AES-256
-
-#### 🔄 En Desarrollo Activo (5 Servicios)
-
-**🎓 Universidad TAMV (85% - Lanzamiento Marzo 2026)**
-- ✅ Sistema de Cursos y Certificación Blockchain
-- ✅ IA Tutoring con Isabella
-- ✅ Entornos de Aprendizaje XR
-- 🔄 Red Global de Instructores (70%)
-- 🔄 Acreditación Internacional (40%)
-
-**🎰 Lotería TAMV (90% - Lanzamiento Febrero 2026)**
-- ✅ Generación Aleatoria Blockchain
-- ✅ Sistema de Sorteos Transparente
-- ✅ Estructura de Premios Multi-nivel
-- 🔄 Licencias Internacionales (40%)
-- 🔄 Plataforma de Marketing (60%)
-
-**🏥 Servicios de Salud (75% - Lanzamiento Abril 2026)**
-- ✅ Plataforma de Telemedicina
-- ✅ Encriptación de Datos Médicos HIPAA
-- ✅ Integración Biométrica
-- 🔄 Terapias XR Salud Mental (60%)
-- 🔄 Red de Farmacias (40%)
-
-**🐾 Mascotas Digitales (80% - Lanzamiento Marzo 2026)**
-- ✅ Motor de Comportamiento IA
-- ✅ Sistema Genético Avanzado
-- ✅ Mecánicas de Evolución
-- 🔄 Personalidades IA Avanzadas (70%)
-- 🔄 Sistema de Competencias (50%)
-
-**📰 Plataforma de Noticias (70% - Lanzamiento Mayo 2026)**
-- ✅ Agregación de Noticias IA
-- ✅ Fact-checking Automático
-- ✅ Verificación de Contenido
-- 🔄 Red de Periodistas (50%)
-- 🔄 Periodismo Ciudadano (60%)
-
-#### 🔮 Próximos Lanzamientos (Q1-Q2 2026)
-
-**📅 Febrero 2026**
-- 🎰 Lotería TAMV Oficial
-- 🔐 ID-NVIDA Beta Público
-- 📱 Apps Móviles iOS/Android
-
-**📅 Marzo 2026**
-- 🎓 Universidad TAMV
-- 🐾 Mascotas Digitales
-- 🌐 Expansión a 50 Países
-
-**📅 Abril-Mayo 2026**
-- 🏥 Servicios de Salud
-- 📰 Plataforma de Noticias
-- 👥 Programa Referidos 500
-- 🎨 Galerías Arte Virtuales
-
-### 📊 Métricas de Rendimiento
-
-**👥 Usuarios y Engagement**
-- 📈 Usuarios Registrados: 8.5 millones
-- 🔥 Usuarios Activos Mensuales: 6.2 millones
-- ⏱️ Tiempo Promedio de Sesión: 45 minutos
-- 🔄 Retención 30 días: 78%
-- 😊 NPS Score: 72
-
-**💰 Métricas Económicas**
-- 💵 Ingresos Mensuales: $42 millones
-- 🎨 Ganancias Creadores: $29.4 millones (70%)
-- 🛍️ Volumen Marketplace: $25 millones/mes
-- 🎁 Regalos Virtuales: $15 millones/mes
-
-**🔧 Métricas Técnicas**
-- ⚡ Uptime del Sistema: 99.97%
-- 🚀 Tiempo de Respuesta: 120ms promedio
-- 👥 Usuarios Concurrentes Pico: 1.2 millones
-- 📊 Datos Procesados Diarios: 50 TB
-- 🤖 Solicitudes IA Diarias: 10 millones
-
-**🛡️ Métricas de Seguridad**
-- 🔒 Incidentes de Seguridad: 0 mensuales
-- 🎯 Precisión Detección Fraude: 99.8%
-- 📋 Cumplimiento Legal: 100%
-- ⚡ Tiempo Detección Amenazas: <1 segundo
-
-### 🏆 Reconocimientos y Logros
-
-**🥇 Premios Recibidos**
-- "Most Innovative Platform 2026" - Tech Innovation Awards
-- "Best AI Ethics Implementation" - AI Ethics Council
-- "Blockchain Excellence Award" - Crypto Innovation Summit
-- "XR Platform of the Year" - Virtual Reality Awards
-
-**📈 Hitos Alcanzados**
-- ✅ Primer millón de usuarios (Enero 2026)
-- ✅ $50M en volumen de transacciones
-- ✅ 25 países con operaciones activas
-- ✅ 500+ proveedores de salud integrados
-- ✅ 150+ cursos UTAMV disponibles
-
-### 🌍 Expansión Global
-
-**🌐 Regiones Activas (25 países)**
-- 🇺🇸 América del Norte: USA, Canadá, México
-- 🇪🇺 Europa: Alemania, Francia, España, Italia, Reino Unido
-- 🇯🇵 Asia-Pacífico: Japón, Corea del Sur, Australia, Singapur
-- 🇧🇷 América Latina: Brasil, Argentina, Chile, Colombia, Perú
-
-**🎯 Próxima Expansión (Q1 2026)**
-- 🇮🇳 India y Sudeste Asiático
-- 🇿🇦 África (Sudáfrica, Nigeria, Kenia)
-- 🇦🇪 Medio Oriente (UAE, Arabia Saudí)
-- 🇳🇴 Europa Nórdica (Noruega, Suecia, Dinamarca)
-
----
-
-**🌟 TAMV DreamWorld v2.0 está LISTO para liderar la revolución digital global.**
-
-**Este es el ecosistema más completo, seguro y ético jamás creado.**  
-**La Web 4.0/5.0 comienza aquí. El futuro digital es TAMV.**
-
----
-
-**Este documento es un artefacto civilizatorio.**  
-No una propuesta.  
-No un producto.  
-Una frontera.
-
----
-
-*Desarrollado con orgullo por Edwin Oswaldo Castillo Trejo (Anubis Villaseñor)*  
-*Orgullosamente Realmontense - México 🇲🇽*
 
 ## 🌟 Descripción del Proyecto
 
@@ -1443,23 +1249,9 @@ kubectl apply -f https://raw.githubusercontent.com/aquasecurity/kube-bench/main/
 
 ### 📚 Documentación Disponible
 
-- **📋 [API Documentation](docs/api/)**: Especificaciones completas de APIs
-- **🏗️ [Architecture Guide](docs/architecture/)**: Guía de arquitectura técnica
 - **🧭 [TAMV DM-X4 Unified Platform](docs/architecture/tamv-dmx4-unified-platform.md)**: Visión y arquitectura consolidada de DM-X4 y TAMV Online Network
-- **🚀 [Deployment Guide](docs/deployment/)**: Guía de despliegue
 - **📓 [Manual Operativo de Despliegue](docs/deployment/operational-manual.md)**: Operación, seguridad, continuidad y cumplimiento
-- **🔧 [Configuration Guide](docs/configuration/)**: Guía de configuración
-- **🛡️ [Security Guide](docs/security/)**: Guía de seguridad
-- **🧪 [Testing Guide](docs/testing/)**: Guía de pruebas
-- **📊 [Monitoring Guide](docs/monitoring/)**: Guía de monitoreo
-
-### 🎓 Tutoriales
-
-- **🚀 [Quick Start Tutorial](docs/tutorials/quick-start.md)**
-- **🔮 [XR Development Tutorial](docs/tutorials/xr-development.md)**
-- **⚛️ [Quantum Computing Tutorial](docs/tutorials/quantum-computing.md)**
-- **🤖 [Isabella AI Tutorial](docs/tutorials/isabella-ai.md)**
-- **⛓️ [Blockchain Integration Tutorial](docs/tutorials/blockchain.md)**
+- **🧩 [Plan de Unificación y Producción](docs/deployment/unification-production-plan.md)**: Consolidación, hardening y roadmap
 
 ---
 
