@@ -50,6 +50,11 @@ export async function grantPermissionHandler(
       return;
     }
 
+    if (req.body.userId === grantedBy && req.body.role !== 'viewer' && req.user?.role !== 'admin') {
+      res.status(400).json({ error: 'Self-escalation is not allowed' });
+      return;
+    }
+
     const permission = await permissionsService.grantDreamspacePermission({
       dreamspaceId: req.params.id,
       userId: req.body.userId,

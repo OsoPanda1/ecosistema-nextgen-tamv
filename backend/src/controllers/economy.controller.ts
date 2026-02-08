@@ -23,6 +23,11 @@ export async function createLedgerEntryHandler(
       return;
     }
 
+    if (req.body.amount <= 0) {
+      res.status(400).json({ error: 'Amount must be greater than zero' });
+      return;
+    }
+
     const entry = await economyService.createLedgerEntry({
       userId: req.body.userId,
       amount: req.body.amount,
@@ -84,6 +89,11 @@ export async function upsertTokenBalanceHandler(
 
     if (requesterRole !== 'admin' && req.body.userId !== requesterId) {
       res.status(403).json({ error: 'Insufficient permissions' });
+      return;
+    }
+
+    if (req.body.balance < 0) {
+      res.status(400).json({ error: 'Balance cannot be negative' });
       return;
     }
 

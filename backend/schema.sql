@@ -105,7 +105,8 @@ CREATE TABLE IF NOT EXISTS dreamspaces (
   owner_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
   access_level VARCHAR(20) NOT NULL,
   metadata JSONB DEFAULT '{}'::jsonb,
-  created_at TIMESTAMP DEFAULT NOW()
+  created_at TIMESTAMP DEFAULT NOW(),
+  CHECK (access_level IN ('public', 'private', 'guardian'))
 );
 
 -- DreamSpaces permissions table
@@ -166,6 +167,7 @@ CREATE INDEX IF NOT EXISTS idx_isabella_decisions_actor_id ON isabella_decisions
 CREATE INDEX IF NOT EXISTS idx_xr_events_actor_id ON xr_events(actor_id);
 CREATE INDEX IF NOT EXISTS idx_dreamspaces_owner_id ON dreamspaces(owner_id);
 CREATE INDEX IF NOT EXISTS idx_dreamspace_permissions_space ON dreamspace_permissions(dreamspace_id);
+CREATE INDEX IF NOT EXISTS idx_dreamspace_permissions_user ON dreamspace_permissions(user_id);
 CREATE INDEX IF NOT EXISTS idx_economy_ledger_user_id ON economy_ledger(user_id);
 CREATE INDEX IF NOT EXISTS idx_token_balances_user_id ON token_balances(user_id);
 CREATE INDEX IF NOT EXISTS idx_memberships_user_id ON memberships(user_id);
