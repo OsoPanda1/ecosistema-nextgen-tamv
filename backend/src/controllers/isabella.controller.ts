@@ -40,7 +40,18 @@ export async function listDecisionsHandler(
     const limit = parseInt(req.query.limit as string) || 20;
     const offset = parseInt(req.query.offset as string) || 0;
 
-    const decisions = await isabellaService.listIsabellaDecisions(limit, offset);
+    const actorId = req.user?.id ?? req.user?.userId;
+    if (!actorId) {
+      res.status(401).json({ error: 'Authentication required' });
+      return;
+    }
+
+    const decisions = await isabellaService.listIsabellaDecisionsForActor(
+      actorId,
+      req.user?.role || 'user',
+      limit,
+      offset
+    );
 
     res.json(decisions);
   } catch (error) {

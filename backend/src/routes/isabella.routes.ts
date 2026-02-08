@@ -31,6 +31,7 @@ router.post(
 
 router.get(
   '/decisions',
+  requireAuth,
   validateQuery(paginationSchema),
   isabellaController.listDecisionsHandler
 );

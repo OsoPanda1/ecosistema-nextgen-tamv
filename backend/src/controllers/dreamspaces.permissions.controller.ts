@@ -4,6 +4,29 @@
 
 import { Request, Response, NextFunction } from 'express';
 import * as permissionsService from '../services/dreamspaces.permissions.service';
+import * as dreamspacesService from '../services/dreamspaces.service';
+
+async function ensureDreamspaceAdmin(
+  dreamspaceId: string,
+  userId: string,
+  role?: string
+): Promise<boolean> {
+  if (role === 'admin') {
+    return true;
+  }
+
+  const dreamspace = await dreamspacesService.getDreamspaceById(dreamspaceId);
+  if (dreamspace && dreamspace.ownerId === userId) {
+    return true;
+  }
+
+  const permission = await permissionsService.getDreamspacePermission(
+    dreamspaceId,
+    userId
+  );
+
+  return permission?.role === 'guardian';
+}
 
 export async function grantPermissionHandler(
   req: Request,
@@ -14,6 +37,16 @@ export async function grantPermissionHandler(
     const grantedBy = req.user?.id ?? req.user?.userId;
     if (!grantedBy) {
       res.status(401).json({ error: 'Authentication required' });
+      return;
+    }
+
+    const allowed = await ensureDreamspaceAdmin(
+      req.params.id,
+      grantedBy,
+      req.user?.role
+    );
+    if (!allowed) {
+      res.status(403).json({ error: 'Insufficient permissions' });
       return;
     }
 
@@ -36,7 +69,25 @@ export async function listPermissionsHandler(
   next: NextFunction
 ): Promise<void> {
   try {
-    const permissions = await permissionsService.listDreamspacePermissions(req.params.id);
+    const requesterId = req.user?.id ?? req.user?.userId;
+    if (!requesterId) {
+      res.status(401).json({ error: 'Authentication required' });
+      return;
+    }
+
+    const allowed = await ensureDreamspaceAdmin(
+      req.params.id,
+      requesterId,
+      req.user?.role
+    );
+    if (!allowed) {
+      res.status(403).json({ error: 'Insufficient permissions' });
+      return;
+    }
+
+    const permissions = await permissionsService.listDreamspacePermissions(
+      req.params.id
+    );
 
     res.json(permissions);
   } catch (error) {
@@ -50,7 +101,26 @@ export async function revokePermissionHandler(
   next: NextFunction
 ): Promise<void> {
   try {
-    await permissionsService.revokeDreamspacePermission(req.params.id, req.params.userId);
+    const requesterId = req.user?.id ?? req.user?.userId;
+    if (!requesterId) {
+      res.status(401).json({ error: 'Authentication required' });
+      return;
+    }
+
+    const allowed = await ensureDreamspaceAdmin(
+      req.params.id,
+      requesterId,
+      req.user?.role
+    );
+    if (!allowed) {
+      res.status(403).json({ error: 'Insufficient permissions' });
+      return;
+    }
+
+    await permissionsService.revokeDreamspacePermission(
+      req.params.id,
+      req.params.userId
+    );
 
     res.status(204).send();
   } catch (error) {

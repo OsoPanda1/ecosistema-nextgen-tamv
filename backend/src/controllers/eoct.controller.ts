@@ -41,7 +41,18 @@ export async function listEvaluationsHandler(
     const limit = parseInt(req.query.limit as string) || 20;
     const offset = parseInt(req.query.offset as string) || 0;
 
-    const evaluations = await eoctService.listEOCTEvaluations(limit, offset);
+    const actorId = req.user?.id ?? req.user?.userId;
+    if (!actorId) {
+      res.status(401).json({ error: 'Authentication required' });
+      return;
+    }
+
+    const evaluations = await eoctService.listEOCTEvaluationsForActor(
+      actorId,
+      req.user?.role || 'user',
+      limit,
+      offset
+    );
 
     res.json(evaluations);
   } catch (error) {

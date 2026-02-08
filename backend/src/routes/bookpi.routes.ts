@@ -31,6 +31,7 @@ router.post(
 
 router.get(
   '/entries',
+  requireAuth,
   validateQuery(paginationSchema),
   bookpiController.listEntriesHandler
 );

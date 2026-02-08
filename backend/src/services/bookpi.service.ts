@@ -52,6 +52,28 @@ export async function listBookPIEntries(
   return result.rows;
 }
 
+export async function listBookPIEntriesForActor(
+  actorId: string,
+  role: string,
+  limit = 20,
+  offset = 0
+): Promise<BookPIEntry[]> {
+  if (role === 'admin') {
+    return listBookPIEntries(limit, offset);
+  }
+
+  const result = await pool.query<BookPIEntry>(
+    `SELECT id, actor_id as "actorId", title, narrative, context, visibility, created_at as "createdAt"
+     FROM bookpi_entries
+     WHERE visibility = 'public' OR actor_id = $1
+     ORDER BY created_at DESC
+     LIMIT $2 OFFSET $3`,
+    [actorId, limit, offset]
+  );
+
+  return result.rows;
+}
+
 export async function getBookPIEntriesByActor(
   actorId: string,
   limit = 20

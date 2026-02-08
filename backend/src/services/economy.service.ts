@@ -79,6 +79,24 @@ export async function listLedgerEntries(
   return result.rows;
 }
 
+export async function listLedgerEntriesForUser(
+  userId: string,
+  limit = 20,
+  offset = 0
+): Promise<LedgerEntry[]> {
+  const result = await pool.query<LedgerEntry>(
+    `SELECT id, user_id as "userId", amount, currency, entry_type as "entryType",
+      reference, metadata, created_at as "createdAt"
+     FROM economy_ledger
+     WHERE user_id = $1
+     ORDER BY created_at DESC
+     LIMIT $2 OFFSET $3`,
+    [userId, limit, offset]
+  );
+
+  return result.rows;
+}
+
 export async function upsertTokenBalance(
   input: TokenBalanceInput
 ): Promise<TokenBalance> {
@@ -109,6 +127,23 @@ export async function listTokenBalances(
   return result.rows;
 }
 
+export async function listTokenBalancesForUser(
+  userId: string,
+  limit = 20,
+  offset = 0
+): Promise<TokenBalance[]> {
+  const result = await pool.query<TokenBalance>(
+    `SELECT id, user_id as "userId", token_type as "tokenType", balance, updated_at as "updatedAt"
+     FROM token_balances
+     WHERE user_id = $1
+     ORDER BY updated_at DESC
+     LIMIT $2 OFFSET $3`,
+    [userId, limit, offset]
+  );
+
+  return result.rows;
+}
+
 export async function createMembership(
   input: MembershipInput
 ): Promise<Membership> {
@@ -132,6 +167,23 @@ export async function listMemberships(
      ORDER BY started_at DESC
      LIMIT $1 OFFSET $2`,
     [limit, offset]
+  );
+
+  return result.rows;
+}
+
+export async function listMembershipsForUser(
+  userId: string,
+  limit = 20,
+  offset = 0
+): Promise<Membership[]> {
+  const result = await pool.query<Membership>(
+    `SELECT id, user_id as "userId", tier, status, ends_at as "endsAt", started_at as "startedAt"
+     FROM memberships
+     WHERE user_id = $1
+     ORDER BY started_at DESC
+     LIMIT $2 OFFSET $3`,
+    [userId, limit, offset]
   );
 
   return result.rows;

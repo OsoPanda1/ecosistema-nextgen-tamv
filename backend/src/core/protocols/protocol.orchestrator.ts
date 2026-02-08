@@ -19,37 +19,44 @@ export interface OrchestratorResult {
   xrSceneId: string;
 }
 
+const EOCT_APPROVED_SCORE = 0.95;
+const EOCT_REJECTED_SCORE = 0.35;
+const ISABELLA_APPROVED_SCORE = 0.92;
+const ISABELLA_REJECTED_SCORE = 0.2;
+
 export async function executeProtocolCommand(
   command: ProtocolCommand,
   context: ProtocolContext
 ): Promise<OrchestratorResult> {
   const event = evaluateProtocol(command, context);
 
-  await createEOCTEvaluation({
-    actorId: context.actorId,
-    subjectType: 'protocol',
-    subjectId: event.id,
-    score: event.decision.allowed ? 0.95 : 0.35,
-    verdict: event.decision.allowed ? 'approved' : 'rejected',
-    notes: event.decision.reasons.join(', ') || 'no_violations',
-  });
-
-  await createIsabellaDecision({
-    actorId: context.actorId,
-    prompt: `Protocol ${command.protocolId} ${command.action}`,
-    response: event.decision.allowed
-      ? 'Decision approved under constitution.'
-      : `Decision rejected: ${event.decision.reasons.join(', ')}`,
-    ethicsScore: event.decision.allowed ? 0.92 : 0.2,
-    context: {
-      protocolId: command.protocolId,
-      action: command.action,
-      layer: context.layer,
-    },
-  });
-
-  await recordProtocolEventToMSR(event);
-  await recordProtocolEventToBookPI(event);
+  await Promise.all([
+    createEOCTEvaluation({
+      actorId: context.actorId,
+      subjectType: 'protocol',
+      subjectId: event.id,
+      score: event.decision.allowed ? EOCT_APPROVED_SCORE : EOCT_REJECTED_SCORE,
+      verdict: event.decision.allowed ? 'approved' : 'rejected',
+      notes: event.decision.reasons.join(', ') || 'no_violations',
+    }),
+    createIsabellaDecision({
+      actorId: context.actorId,
+      prompt: `Protocol ${command.protocolId} ${command.action}`,
+      response: event.decision.allowed
+        ? 'Decision approved under constitution.'
+        : `Decision rejected: ${event.decision.reasons.join(', ')}`,
+      ethicsScore: event.decision.allowed
+        ? ISABELLA_APPROVED_SCORE
+        : ISABELLA_REJECTED_SCORE,
+      context: {
+        protocolId: command.protocolId,
+        action: command.action,
+        layer: context.layer,
+      },
+    }),
+    recordProtocolEventToMSR(event),
+    recordProtocolEventToBookPI(event),
+  ]);
 
   const guardianEvent = createGuardianEvent(event.protocolId, event.decision, {
     actorId: context.actorId,

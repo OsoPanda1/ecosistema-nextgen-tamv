@@ -2,8 +2,9 @@
  * XR Gateway (WebSocket)
  */
 
-import { Server } from 'http';
+import { IncomingMessage, Server } from 'http';
 import { WebSocketServer } from 'ws';
+import { verifyToken } from '../../utils/jwt';
 
 export interface XRGatewayMessage {
   type: string;
@@ -26,10 +27,32 @@ export function buildXRGatewayMessage(
   };
 }
 
-export function createXRGateway(server: Server, options: XRGatewayOptions = {}): WebSocketServer {
+function getToken(request: IncomingMessage): string | null {
+  const url = request.url ? new URL(request.url, 'http://localhost') : null;
+  const token = url?.searchParams.get('token');
+  return token || null;
+}
+
+export function createXRGateway(
+  server: Server,
+  options: XRGatewayOptions = {}
+): WebSocketServer {
   const wss = new WebSocketServer({ server, path: options.path || '/ws/xr' });
 
-  wss.on('connection', (socket) => {
+  wss.on('connection', (socket, request) => {
+    const token = getToken(request);
+    if (!token) {
+      socket.close(1008, 'Authentication required');
+      return;
+    }
+
+    try {
+      verifyToken(token);
+    } catch {
+      socket.close(1008, 'Invalid token');
+      return;
+    }
+
     socket.send(
       JSON.stringify(
         buildXRGatewayMessage('welcome', {

@@ -56,3 +56,18 @@ export async function revokeDreamspacePermission(
     [dreamspaceId, userId]
   );
 }
+
+export async function getDreamspacePermission(
+  dreamspaceId: string,
+  userId: string
+): Promise<DreamspacePermission | null> {
+  const result = await pool.query<DreamspacePermission>(
+    `SELECT id, dreamspace_id as "dreamspaceId", user_id as "userId", role, granted_by as "grantedBy",
+      created_at as "createdAt"
+     FROM dreamspace_permissions
+     WHERE dreamspace_id = $1 AND user_id = $2`,
+    [dreamspaceId, userId]
+  );
+
+  return result.rows[0] || null;
+}

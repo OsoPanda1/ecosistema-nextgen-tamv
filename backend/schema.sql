@@ -57,7 +57,7 @@ CREATE TABLE IF NOT EXISTS follows (
 -- BookPI entries table
 CREATE TABLE IF NOT EXISTS bookpi_entries (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  actor_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  actor_id UUID REFERENCES users(id) ON DELETE SET NULL,
   title VARCHAR(255) NOT NULL,
   narrative TEXT NOT NULL,
   context JSONB DEFAULT '{}'::jsonb,
@@ -68,7 +68,7 @@ CREATE TABLE IF NOT EXISTS bookpi_entries (
 -- EOCT evaluations table
 CREATE TABLE IF NOT EXISTS eoct_evaluations (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  actor_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  actor_id UUID REFERENCES users(id) ON DELETE SET NULL,
   subject_type VARCHAR(100) NOT NULL,
   subject_id UUID,
   score NUMERIC(4, 3) NOT NULL,
@@ -81,7 +81,7 @@ CREATE TABLE IF NOT EXISTS eoct_evaluations (
 -- Isabella decisions table
 CREATE TABLE IF NOT EXISTS isabella_decisions (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  actor_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  actor_id UUID REFERENCES users(id) ON DELETE SET NULL,
   prompt TEXT NOT NULL,
   response TEXT NOT NULL,
   ethics_score NUMERIC(4, 3) NOT NULL,
@@ -92,7 +92,7 @@ CREATE TABLE IF NOT EXISTS isabella_decisions (
 -- XR events table
 CREATE TABLE IF NOT EXISTS xr_events (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  actor_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  actor_id UUID REFERENCES users(id) ON DELETE SET NULL,
   event_type VARCHAR(100) NOT NULL,
   payload JSONB DEFAULT '{}'::jsonb,
   created_at TIMESTAMP DEFAULT NOW()
@@ -112,9 +112,9 @@ CREATE TABLE IF NOT EXISTS dreamspaces (
 CREATE TABLE IF NOT EXISTS dreamspace_permissions (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   dreamspace_id UUID NOT NULL REFERENCES dreamspaces(id) ON DELETE CASCADE,
-  user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  user_id UUID REFERENCES users(id) ON DELETE SET NULL,
   role VARCHAR(20) NOT NULL,
-  granted_by UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  granted_by UUID REFERENCES users(id) ON DELETE SET NULL,
   created_at TIMESTAMP DEFAULT NOW(),
   updated_at TIMESTAMP DEFAULT NOW(),
   UNIQUE (dreamspace_id, user_id)

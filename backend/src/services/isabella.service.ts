@@ -58,3 +58,26 @@ export async function listIsabellaDecisions(
 
   return result.rows;
 }
+
+export async function listIsabellaDecisionsForActor(
+  actorId: string,
+  role: string,
+  limit = 20,
+  offset = 0
+): Promise<IsabellaDecision[]> {
+  if (role === 'admin') {
+    return listIsabellaDecisions(limit, offset);
+  }
+
+  const result = await pool.query<IsabellaDecision>(
+    `SELECT id, actor_id as "actorId", prompt, response, ethics_score as "ethicsScore",
+      context, created_at as "createdAt"
+     FROM isabella_decisions
+     WHERE actor_id = $1
+     ORDER BY created_at DESC
+     LIMIT $2 OFFSET $3`,
+    [actorId, limit, offset]
+  );
+
+  return result.rows;
+}

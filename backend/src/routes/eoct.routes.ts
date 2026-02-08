@@ -47,6 +47,7 @@ router.post(
 
 router.get(
   '/evaluations',
+  requireAuth,
   validateQuery(paginationSchema),
   eoctController.listEvaluationsHandler
 );

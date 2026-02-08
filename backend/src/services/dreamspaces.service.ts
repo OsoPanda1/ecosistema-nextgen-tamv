@@ -17,6 +17,18 @@ export interface Dreamspace extends DreamspaceInput {
   createdAt: string;
 }
 
+export async function getDreamspaceById(id: string): Promise<Dreamspace | null> {
+  const result = await pool.query<Dreamspace>(
+    `SELECT id, name, owner_id as "ownerId", access_level as "accessLevel",
+      metadata, created_at as "createdAt"
+     FROM dreamspaces
+     WHERE id = $1`,
+    [id]
+  );
+
+  return result.rows[0] || null;
+}
+
 export async function createDreamspace(
   input: DreamspaceInput
 ): Promise<Dreamspace> {

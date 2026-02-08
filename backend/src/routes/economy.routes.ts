@@ -46,6 +46,7 @@ router.post(
 
 router.get(
   '/ledger',
+  requireAuth,
   validateQuery(paginationSchema),
   economyController.listLedgerEntriesHandler
 );
@@ -59,6 +60,7 @@ router.post(
 
 router.get(
   '/tokens',
+  requireAuth,
   validateQuery(paginationSchema),
   economyController.listTokenBalancesHandler
 );
@@ -72,6 +74,7 @@ router.post(
 
 router.get(
   '/memberships',
+  requireAuth,
   validateQuery(paginationSchema),
   economyController.listMembershipsHandler
 );

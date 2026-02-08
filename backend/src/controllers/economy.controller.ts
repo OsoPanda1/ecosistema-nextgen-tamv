@@ -11,6 +11,18 @@ export async function createLedgerEntryHandler(
   next: NextFunction
 ): Promise<void> {
   try {
+    const requesterId = req.user?.userId;
+    const requesterRole = req.user?.role;
+    if (!requesterId) {
+      res.status(401).json({ error: 'Authentication required' });
+      return;
+    }
+
+    if (requesterRole !== 'admin' && req.body.userId !== requesterId) {
+      res.status(403).json({ error: 'Insufficient permissions' });
+      return;
+    }
+
     const entry = await economyService.createLedgerEntry({
       userId: req.body.userId,
       amount: req.body.amount,
@@ -32,10 +44,24 @@ export async function listLedgerEntriesHandler(
   next: NextFunction
 ): Promise<void> {
   try {
+    const requesterId = req.user?.userId;
+    const requesterRole = req.user?.role;
+    if (!requesterId) {
+      res.status(401).json({ error: 'Authentication required' });
+      return;
+    }
+
     const limit = parseInt(req.query.limit as string) || 20;
     const offset = parseInt(req.query.offset as string) || 0;
 
-    const entries = await economyService.listLedgerEntries(limit, offset);
+    const entries =
+      requesterRole === 'admin'
+        ? await economyService.listLedgerEntries(limit, offset)
+        : await economyService.listLedgerEntriesForUser(
+            requesterId,
+            limit,
+            offset
+          );
 
     res.json(entries);
   } catch (error) {
@@ -49,6 +75,18 @@ export async function upsertTokenBalanceHandler(
   next: NextFunction
 ): Promise<void> {
   try {
+    const requesterId = req.user?.userId;
+    const requesterRole = req.user?.role;
+    if (!requesterId) {
+      res.status(401).json({ error: 'Authentication required' });
+      return;
+    }
+
+    if (requesterRole !== 'admin' && req.body.userId !== requesterId) {
+      res.status(403).json({ error: 'Insufficient permissions' });
+      return;
+    }
+
     const balance = await economyService.upsertTokenBalance({
       userId: req.body.userId,
       tokenType: req.body.tokenType,
@@ -67,10 +105,24 @@ export async function listTokenBalancesHandler(
   next: NextFunction
 ): Promise<void> {
   try {
+    const requesterId = req.user?.userId;
+    const requesterRole = req.user?.role;
+    if (!requesterId) {
+      res.status(401).json({ error: 'Authentication required' });
+      return;
+    }
+
     const limit = parseInt(req.query.limit as string) || 20;
     const offset = parseInt(req.query.offset as string) || 0;
 
-    const balances = await economyService.listTokenBalances(limit, offset);
+    const balances =
+      requesterRole === 'admin'
+        ? await economyService.listTokenBalances(limit, offset)
+        : await economyService.listTokenBalancesForUser(
+            requesterId,
+            limit,
+            offset
+          );
 
     res.json(balances);
   } catch (error) {
@@ -84,6 +136,18 @@ export async function createMembershipHandler(
   next: NextFunction
 ): Promise<void> {
   try {
+    const requesterId = req.user?.userId;
+    const requesterRole = req.user?.role;
+    if (!requesterId) {
+      res.status(401).json({ error: 'Authentication required' });
+      return;
+    }
+
+    if (requesterRole !== 'admin' && req.body.userId !== requesterId) {
+      res.status(403).json({ error: 'Insufficient permissions' });
+      return;
+    }
+
     const membership = await economyService.createMembership({
       userId: req.body.userId,
       tier: req.body.tier,
@@ -103,10 +167,24 @@ export async function listMembershipsHandler(
   next: NextFunction
 ): Promise<void> {
   try {
+    const requesterId = req.user?.userId;
+    const requesterRole = req.user?.role;
+    if (!requesterId) {
+      res.status(401).json({ error: 'Authentication required' });
+      return;
+    }
+
     const limit = parseInt(req.query.limit as string) || 20;
     const offset = parseInt(req.query.offset as string) || 0;
 
-    const memberships = await economyService.listMemberships(limit, offset);
+    const memberships =
+      requesterRole === 'admin'
+        ? await economyService.listMemberships(limit, offset)
+        : await economyService.listMembershipsForUser(
+            requesterId,
+            limit,
+            offset
+          );
 
     res.json(memberships);
   } catch (error) {

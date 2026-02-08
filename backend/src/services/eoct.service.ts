@@ -79,3 +79,26 @@ export async function listEOCTEvaluations(
 
   return result.rows;
 }
+
+export async function listEOCTEvaluationsForActor(
+  actorId: string,
+  role: string,
+  limit = 20,
+  offset = 0
+): Promise<EOCTEvaluation[]> {
+  if (role === 'admin') {
+    return listEOCTEvaluations(limit, offset);
+  }
+
+  const result = await pool.query<EOCTEvaluation>(
+    `SELECT id, actor_id as "actorId", subject_type as "subjectType", subject_id as "subjectId",
+      score, verdict, notes, risk_level as "riskLevel", created_at as "createdAt"
+     FROM eoct_evaluations
+     WHERE actor_id = $1
+     ORDER BY created_at DESC
+     LIMIT $2 OFFSET $3`,
+    [actorId, limit, offset]
+  );
+
+  return result.rows;
+}
