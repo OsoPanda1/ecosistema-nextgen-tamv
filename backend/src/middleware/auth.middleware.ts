@@ -9,7 +9,7 @@ import { verifyToken, TokenPayload } from '../utils/jwt';
 // Extend Express Request to include user
 declare module 'express-serve-static-core' {
   interface Request {
-    user?: TokenPayload;
+    user?: TokenPayload & { id?: string };
   }
 }
 
@@ -31,8 +31,11 @@ export function requireAuth(req: Request, res: Response, next: NextFunction): vo
     // Verify token
     const payload = verifyToken(token);
 
-    // Attach user to request
-    req.user = payload;
+    // Attach user to request with normalized id
+    req.user = {
+      ...payload,
+      id: payload.userId,
+    };
 
     next();
   } catch {
@@ -50,7 +53,10 @@ export function optionalAuth(req: Request, res: Response, next: NextFunction): v
     if (authHeader && authHeader.startsWith('Bearer ')) {
       const token = authHeader.substring(7);
       const payload = verifyToken(token);
-      req.user = payload;
+      req.user = {
+        ...payload,
+        id: payload.userId,
+      };
     }
   } catch {
     // Ignore errors for optional auth

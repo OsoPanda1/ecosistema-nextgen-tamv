@@ -186,3 +186,36 @@ export async function getFeed(
     limit,
   };
 }
+
+/**
+ * Get global feed (public posts)
+ */
+export async function getGlobalFeed(
+  page: number = 1,
+  limit: number = 20
+): Promise<{ data: PostWithUser[]; total: number; page: number; limit: number }> {
+  const offset = (page - 1) * limit;
+
+  const countResult = await query<{ count: string }>(
+    `SELECT COUNT(*) as count FROM posts p
+     WHERE p.deleted_at IS NULL AND p.visibility = 'public'`
+  );
+  const total = parseInt(countResult.rows[0].count);
+
+  const dataResult = await query<PostWithUser>(
+    `SELECT p.*, u.username, u.display_name, u.avatar
+     FROM posts p
+     JOIN users u ON p.user_id = u.id
+     WHERE p.deleted_at IS NULL AND p.visibility = 'public'
+     ORDER BY p.created_at DESC
+     LIMIT $1 OFFSET $2`,
+    [limit, offset]
+  );
+
+  return {
+    data: dataResult.rows,
+    total,
+    page,
+    limit,
+  };
+}
