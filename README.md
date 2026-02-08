@@ -1445,6 +1445,7 @@ kubectl apply -f https://raw.githubusercontent.com/aquasecurity/kube-bench/main/
 
 - **📋 [API Documentation](docs/api/)**: Especificaciones completas de APIs
 - **🏗️ [Architecture Guide](docs/architecture/)**: Guía de arquitectura técnica
+- **🧭 [TAMV DM-X4 Unified Platform](docs/architecture/tamv-dmx4-unified-platform.md)**: Visión y arquitectura consolidada de DM-X4 y TAMV Online Network
 - **🚀 [Deployment Guide](docs/deployment/)**: Guía de despliegue
 - **🔧 [Configuration Guide](docs/configuration/)**: Guía de configuración
 - **🛡️ [Security Guide](docs/security/)**: Guía de seguridad
