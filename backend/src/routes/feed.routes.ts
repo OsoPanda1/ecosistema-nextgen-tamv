@@ -26,4 +26,14 @@ router.get(
   postController.getFeedHandler
 );
 
+/**
+ * GET /api/v1/feed/global
+ * Get global public feed
+ */
+router.get(
+  '/global',
+  validateQuery(paginationSchema),
+  postController.getGlobalFeedHandler
+);
+
 export default router;

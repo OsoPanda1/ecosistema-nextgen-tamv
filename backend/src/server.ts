@@ -4,6 +4,7 @@
  */
 
 import express, { Application } from 'express';
+import { createServer } from 'http';
 import cors from 'cors';
 import helmet from 'helmet';
 import cookieParser from 'cookie-parser';
@@ -17,11 +18,20 @@ import feedRoutes from './routes/feed.routes';
 import identityRoutes from './routes/identity.routes';
 import msrRoutes from './routes/msr.routes';
 import governanceRoutes from './routes/governance.routes';
+import protocolRoutes from './routes/protocol.routes';
+import bookpiRoutes from './routes/bookpi.routes';
+import eoctRoutes from './routes/eoct.routes';
+import isabellaRoutes from './routes/isabella.routes';
+import xrRoutes from './routes/xr.routes';
+import dreamspacesRoutes from './routes/dreamspaces.routes';
+import economyRoutes from './routes/economy.routes';
 
 // Middleware
 import { errorHandler, notFoundHandler } from './middleware/error.middleware';
+import { createXRGateway } from './core/xr/xr.gateway';
 
 const app: Application = express();
+const server = createServer(app);
 const PORT = process.env.PORT || 3000;
 
 // Security middleware
@@ -55,6 +65,13 @@ app.use('/api/v1/feed', feedRoutes);
 app.use('/api/v1/identity', identityRoutes);
 app.use('/api/v1/msr', msrRoutes);
 app.use('/api/v1/governance', governanceRoutes);
+app.use('/api/v1/protocols', protocolRoutes);
+app.use('/api/v1/bookpi', bookpiRoutes);
+app.use('/api/v1/eoct', eoctRoutes);
+app.use('/api/v1/isabella', isabellaRoutes);
+app.use('/api/v1/xr', xrRoutes);
+app.use('/api/v1/dreamspaces', dreamspacesRoutes);
+app.use('/api/v1/economy', economyRoutes);
 
 // 404 handler
 app.use(notFoundHandler);
@@ -69,11 +86,14 @@ async function startServer() {
     await pool.query('SELECT NOW()');
     console.log('✅ Database connection established');
 
-    app.listen(PORT, () => {
+    createXRGateway(server, { path: '/ws/xr' });
+
+    server.listen(PORT, () => {
       console.log(`🚀 Server running on port ${PORT}`);
       console.log(`📍 Environment: ${process.env.NODE_ENV || 'development'}`);
       console.log(`🔗 API: http://localhost:${PORT}/api/v1`);
       console.log(`💚 Health: http://localhost:${PORT}/health`);
+      console.log(`🛰️ XR Gateway: ws://localhost:${PORT}/ws/xr`);
     });
   } catch (error) {
     console.error('❌ Failed to start server:', error);

@@ -1445,7 +1445,9 @@ kubectl apply -f https://raw.githubusercontent.com/aquasecurity/kube-bench/main/
 
 - **📋 [API Documentation](docs/api/)**: Especificaciones completas de APIs
 - **🏗️ [Architecture Guide](docs/architecture/)**: Guía de arquitectura técnica
+- **🧭 [TAMV DM-X4 Unified Platform](docs/architecture/tamv-dmx4-unified-platform.md)**: Visión y arquitectura consolidada de DM-X4 y TAMV Online Network
 - **🚀 [Deployment Guide](docs/deployment/)**: Guía de despliegue
+- **📓 [Manual Operativo de Despliegue](docs/deployment/operational-manual.md)**: Operación, seguridad, continuidad y cumplimiento
 - **🔧 [Configuration Guide](docs/configuration/)**: Guía de configuración
 - **🛡️ [Security Guide](docs/security/)**: Guía de seguridad
 - **🧪 [Testing Guide](docs/testing/)**: Guía de pruebas
@@ -1562,35 +1564,35 @@ Este proyecto está licenciado bajo un esquema dual que protege tanto la filosof
 
 ---
 
-## 🎉 Estado del Proyecto
+## 🎉 Estado del Proyecto (Avance Real)
 
-### ✅ Completado (100%)
+**Estado actual:** Base consolidada con avance aproximado de **68%** en la unificación y preparación para producción. El enfoque actual está en completar la consolidación, endurecer seguridad, y cerrar la implementación del core funcional (backend + API + base de datos).  
 
-- ✅ **Arquitectura de 7 Capas Federadas**
-- ✅ **Sistema TENOCHTITLAN de Seguridad**
-- ✅ **Motor XR/VR/3D/4D Completo**
-- ✅ **Procesador Quantum-Clásico Híbrido**
-- ✅ **Isabella AI Universal Library**
-- ✅ **Blockchain MSR Antifraude**
-- ✅ **Enciclopedia Universal Integrada**
-- ✅ **Infraestructura Terraform + Kubernetes**
-- ✅ **Service Mesh Istio Completo**
-- ✅ **Monitoreo Grafana + Prometheus**
-- ✅ **CI/CD Pipeline GitHub Actions**
-- ✅ **Documentación Completa**
-- ✅ **Scripts de Despliegue Automatizado**
+### ✅ Completado (aprox. 68%)
 
-### 🚀 Listo para Producción
+- ✅ **Estructura canónica del monorepo** (frontend/backend/infrastructure/database/docs/scripts/tests).
+- ✅ **Tooling base** (TypeScript strict, ESLint, Prettier, Jest, Husky).
+- ✅ **Análisis de duplicados y estrategia de merge** con pruebas.
+- ✅ **Plan de unificación y documentación base**.
 
-El proyecto TAMV está **100% completo y listo para despliegue en producción**. Incluye:
+### 🚧 En progreso / Pendiente crítico
 
-- **🏗️ Infraestructura completa** con Terraform y Kubernetes
-- **🔧 Automatización total** con scripts de despliegue
-- **📊 Monitoreo avanzado** con Grafana y Prometheus
-- **🛡️ Seguridad robusta** con sistema TENOCHTITLAN
-- **🧪 Testing comprehensivo** con múltiples tipos de pruebas
-- **📚 Documentación exhaustiva** para todos los componentes
-- **🚀 CI/CD pipeline** completamente funcional
+- **Consolidación real de carpetas duplicadas** y archivado final.
+- **Capa de base de datos** (schemas/migraciones definitivas y pooling).
+- **Seguridad backend** (JWT, RBAC, rate limiting, validación de inputs).
+- **API de usuarios y social wall** con pruebas de integración.
+- **Sistema de configuración unificado** y validación de `.env`.
+- **Scripts de despliegue canónicos** (dev/staging/prod) con rollback.
+- **Pruebas integrales y cobertura ≥80%**.
+- **Documentación final de arquitectura y despliegue**.
+
+### 🧭 Próximos hitos
+
+1. Ejecutar consolidación completa y eliminar duplicados.
+2. Completar base de datos + seguridad del backend.
+3. Finalizar API core + pruebas.
+4. Unificar documentación y flujos de despliegue.
+5. Cerrar checklist de producción.
 
 ---
 
