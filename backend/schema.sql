@@ -10,10 +10,13 @@ CREATE TABLE IF NOT EXISTS users (
   email VARCHAR(255) UNIQUE NOT NULL,
   password_hash VARCHAR(255) NOT NULL,
   username VARCHAR(50) UNIQUE NOT NULL,
+  display_name VARCHAR(100),
   avatar VARCHAR(500),
   bio TEXT,
+  location VARCHAR(150),
   created_at TIMESTAMP DEFAULT NOW(),
-  updated_at TIMESTAMP DEFAULT NOW()
+  updated_at TIMESTAMP DEFAULT NOW(),
+  deleted_at TIMESTAMP
 );
 
 -- Posts table
@@ -22,10 +25,16 @@ CREATE TABLE IF NOT EXISTS posts (
   user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
   content TEXT NOT NULL,
   media_url VARCHAR(500),
+  media_urls TEXT[] DEFAULT '{}'::text[],
+  visibility VARCHAR(20) DEFAULT 'public',
   likes_count INTEGER DEFAULT 0,
+  like_count INTEGER DEFAULT 0,
   comments_count INTEGER DEFAULT 0,
+  comment_count INTEGER DEFAULT 0,
   created_at TIMESTAMP DEFAULT NOW(),
-  updated_at TIMESTAMP DEFAULT NOW()
+  updated_at TIMESTAMP DEFAULT NOW(),
+  deleted_at TIMESTAMP,
+  CHECK (visibility IN ('public', 'followers', 'private'))
 );
 
 -- Likes table
@@ -42,7 +51,10 @@ CREATE TABLE IF NOT EXISTS comments (
   post_id UUID NOT NULL REFERENCES posts(id) ON DELETE CASCADE,
   user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
   content TEXT NOT NULL,
-  created_at TIMESTAMP DEFAULT NOW()
+  parent_comment_id UUID REFERENCES comments(id) ON DELETE CASCADE,
+  created_at TIMESTAMP DEFAULT NOW(),
+  updated_at TIMESTAMP DEFAULT NOW(),
+  deleted_at TIMESTAMP
 );
 
 -- Follows table
