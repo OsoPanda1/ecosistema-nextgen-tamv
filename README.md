@@ -25,8 +25,6 @@
 
 ---
 
----
-
 ## 🌟 DESCRIPCIÓN TOTAL DEL PROYECTO
 
 TAMV DreamWorld v2.0 es el **primer ecosistema civilizacional federado antifrágil a nivel mundial** que representa la evolución de todo lo conocido en la red. Es una **arquitectura civilizatoria antifrágil y federada** que combina:
