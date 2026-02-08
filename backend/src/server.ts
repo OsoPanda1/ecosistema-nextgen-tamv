@@ -17,6 +17,13 @@ import feedRoutes from './routes/feed.routes';
 import identityRoutes from './routes/identity.routes';
 import msrRoutes from './routes/msr.routes';
 import governanceRoutes from './routes/governance.routes';
+import protocolRoutes from './routes/protocol.routes';
+import bookpiRoutes from './routes/bookpi.routes';
+import eoctRoutes from './routes/eoct.routes';
+import isabellaRoutes from './routes/isabella.routes';
+import xrRoutes from './routes/xr.routes';
+import dreamspacesRoutes from './routes/dreamspaces.routes';
+import economyRoutes from './routes/economy.routes';
 
 // Middleware
 import { errorHandler, notFoundHandler } from './middleware/error.middleware';
@@ -55,6 +62,13 @@ app.use('/api/v1/feed', feedRoutes);
 app.use('/api/v1/identity', identityRoutes);
 app.use('/api/v1/msr', msrRoutes);
 app.use('/api/v1/governance', governanceRoutes);
+app.use('/api/v1/protocols', protocolRoutes);
+app.use('/api/v1/bookpi', bookpiRoutes);
+app.use('/api/v1/eoct', eoctRoutes);
+app.use('/api/v1/isabella', isabellaRoutes);
+app.use('/api/v1/xr', xrRoutes);
+app.use('/api/v1/dreamspaces', dreamspacesRoutes);
+app.use('/api/v1/economy', economyRoutes);
 
 // 404 handler
 app.use(notFoundHandler);
