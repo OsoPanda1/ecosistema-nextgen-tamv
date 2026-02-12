@@ -43,8 +43,8 @@ export async function listEntriesHandler(
       return;
     }
 
-    const limit = typeof req.query.limit === 'number' ? req.query.limit : 20;
-    const offset = typeof req.query.offset === 'number' ? req.query.offset : 0;
+    const limit = req.query.limit as number;
+    const offset = req.query.offset as number;
 
     const entries = await bookpiService.listBookPIEntriesForActor(
       actorId,
