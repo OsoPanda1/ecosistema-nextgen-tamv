@@ -36,7 +36,10 @@ export function evaluateConstitution(
 
   if (payload['coercive'] === true) {
     reasons.push('coercion_not_allowed');
-    severity = 'high';
+    if (severity !== 'critical') {
+      severity = 'high';
+    }
+  }
   }
 
   const allowed = reasons.length === 0;
