@@ -23,6 +23,11 @@ export async function createLedgerEntryHandler(
       return;
     }
 
+    if (requesterRole !== 'admin' && (req.body.entryType === 'credit' || req.body.entryType === 'reward')) {
+      res.status(403).json({ error: 'Only admins can create credit or reward entries' });
+      return;
+    }
+
     if (req.body.amount <= 0) {
       res.status(400).json({ error: 'Amount must be greater than zero' });
       return;
