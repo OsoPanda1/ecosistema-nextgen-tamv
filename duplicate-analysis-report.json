@@ -1,219 +1,31 @@
 {
-  "timestamp": "2026-02-03T04:45:11.897Z",
-  "duplicateFolders": [
-    {
-      "name": "TAMV-COMPLETE-PROJECT",
-      "path": "C:\\Users\\tamvo\\OneDrive\\aqui\\Datos adjuntos\\tamv\\TAMV-COMPLETE-PROJECT",
-      "fileCount": 65,
-      "totalSize": 945850,
-      "lastModified": "2026-02-03T04:08:39.551Z",
-      "isEmpty": false,
-      "qualityScore": {
-        "completeness": 51,
-        "recency": 100,
-        "codeQuality": 12,
-        "overall": 54
-      }
-    },
-    {
-      "name": "TAMV-ENHANCED-ARCHITECTURE",
-      "path": "C:\\Users\\tamvo\\OneDrive\\aqui\\Datos adjuntos\\tamv\\TAMV-ENHANCED-ARCHITECTURE",
-      "fileCount": 10,
-      "totalSize": 273035,
-      "lastModified": "2026-02-02T03:32:24.980Z",
-      "isEmpty": false,
-      "qualityScore": {
-        "completeness": 4,
-        "recency": 100,
-        "codeQuality": 0,
-        "overall": 32
-      }
-    },
-    {
-      "name": "TAMV-FINAL-PRODUCTION-READY",
-      "path": "C:\\Users\\tamvo\\OneDrive\\aqui\\Datos adjuntos\\tamv\\TAMV-FINAL-PRODUCTION-READY",
-      "fileCount": 2,
-      "totalSize": 42102,
-      "lastModified": "2026-02-02T07:59:20.042Z",
-      "isEmpty": false,
-      "qualityScore": {
-        "completeness": 6,
-        "recency": 100,
-        "codeQuality": 0,
-        "overall": 32
-      }
-    },
-    {
-      "name": "tamv-enhanced-complete-bundle",
-      "path": "C:\\Users\\tamvo\\OneDrive\\aqui\\Datos adjuntos\\tamv\\tamv-enhanced-complete-bundle",
-      "fileCount": 3,
-      "totalSize": 12635,
-      "lastModified": "2026-02-02T03:48:49.045Z",
-      "isEmpty": false,
-      "qualityScore": {
-        "completeness": 21,
-        "recency": 100,
-        "codeQuality": 20,
-        "overall": 44
-      }
-    }
-  ],
+  "timestamp": "2026-02-13T05:31:31.574Z",
+  "duplicateFolders": [],
   "duplicateDocumentationFiles": [
     {
-      "name": "CGIFTS-TAMV-IMPLEMENTATION-SUMMARY.md",
-      "path": "C:\\Users\\tamvo\\OneDrive\\aqui\\Datos adjuntos\\tamv\\CGIFTS-TAMV-IMPLEMENTATION-SUMMARY.md",
-      "size": 9717,
-      "lastModified": "2026-02-02T09:38:51.673Z"
-    },
-    {
-      "name": "CLEANUP-COMPLETE-REPORT.md",
-      "path": "C:\\Users\\tamvo\\OneDrive\\aqui\\Datos adjuntos\\tamv\\CLEANUP-COMPLETE-REPORT.md",
-      "size": 10447,
-      "lastModified": "2026-02-02T19:17:36.389Z"
-    },
-    {
-      "name": "CONSOLIDATION-SUMMARY.md",
-      "path": "C:\\Users\\tamvo\\OneDrive\\aqui\\Datos adjuntos\\tamv\\CONSOLIDATION-SUMMARY.md",
-      "size": 12854,
-      "lastModified": "2026-02-02T19:16:46.968Z"
-    },
-    {
-      "name": "CONTRIBUTING.md",
-      "path": "C:\\Users\\tamvo\\OneDrive\\aqui\\Datos adjuntos\\tamv\\CONTRIBUTING.md",
-      "size": 5556,
-      "lastModified": "2026-02-03T04:31:08.177Z"
-    },
-    {
-      "name": "EDWIN-CASTILLO-TREJO-POSICIONAMIENTO-HISTORICO.md",
-      "path": "C:\\Users\\tamvo\\OneDrive\\aqui\\Datos adjuntos\\tamv\\EDWIN-CASTILLO-TREJO-POSICIONAMIENTO-HISTORICO.md",
-      "size": 11523,
-      "lastModified": "2026-02-02T09:38:51.674Z"
-    },
-    {
-      "name": "IMPLEMENTACION-PLAN-COMPLETO.md",
-      "path": "C:\\Users\\tamvo\\OneDrive\\aqui\\Datos adjuntos\\tamv\\IMPLEMENTACION-PLAN-COMPLETO.md",
-      "size": 594,
-      "lastModified": "2026-02-03T04:08:39.543Z"
-    },
-    {
-      "name": "INSTRUCCIONES-DESPLIEGUE-RAPIDO.md",
-      "path": "C:\\Users\\tamvo\\OneDrive\\aqui\\Datos adjuntos\\tamv\\INSTRUCCIONES-DESPLIEGUE-RAPIDO.md",
-      "size": 5038,
-      "lastModified": "2026-02-03T00:34:03.077Z"
-    },
-    {
-      "name": "INSTRUCCIONES-FINALES.md",
-      "path": "C:\\Users\\tamvo\\OneDrive\\aqui\\Datos adjuntos\\tamv\\INSTRUCCIONES-FINALES.md",
-      "size": 3654,
-      "lastModified": "2026-02-02T21:35:02.022Z"
-    },
-    {
-      "name": "INSTRUCCIONES-GITHUB.md",
-      "path": "C:\\Users\\tamvo\\OneDrive\\aqui\\Datos adjuntos\\tamv\\INSTRUCCIONES-GITHUB.md",
-      "size": 1969,
-      "lastModified": "2026-02-02T09:38:51.677Z"
-    },
-    {
-      "name": "LEEME-PRIMERO.md",
-      "path": "C:\\Users\\tamvo\\OneDrive\\aqui\\Datos adjuntos\\tamv\\LEEME-PRIMERO.md",
-      "size": 6470,
-      "lastModified": "2026-02-03T00:35:53.074Z"
-    },
-    {
-      "name": "LOGROS-HOY.md",
-      "path": "C:\\Users\\tamvo\\OneDrive\\aqui\\Datos adjuntos\\tamv\\LOGROS-HOY.md",
-      "size": 6373,
-      "lastModified": "2026-02-03T00:36:40.936Z"
-    },
-    {
-      "name": "PLAN-EJECUCION-INMEDIATO.md",
-      "path": "C:\\Users\\tamvo\\OneDrive\\aqui\\Datos adjuntos\\tamv\\PLAN-EJECUCION-INMEDIATO.md",
-      "size": 7965,
-      "lastModified": "2026-02-03T00:21:28.685Z"
-    },
-    {
-      "name": "PLAN-EJECUCION-TAMV-FUNCIONAL.md",
-      "path": "C:\\Users\\tamvo\\OneDrive\\aqui\\Datos adjuntos\\tamv\\PLAN-EJECUCION-TAMV-FUNCIONAL.md",
-      "size": 0,
-      "lastModified": "2026-02-03T00:19:11.008Z"
-    },
-    {
-      "name": "README-GITHUB.md",
-      "path": "C:\\Users\\tamvo\\OneDrive\\aqui\\Datos adjuntos\\tamv\\README-GITHUB.md",
-      "size": 10025,
-      "lastModified": "2026-02-02T09:38:51.678Z"
-    },
-    {
       "name": "README.md",
-      "path": "C:\\Users\\tamvo\\OneDrive\\aqui\\Datos adjuntos\\tamv\\README.md",
-      "size": 27203,
-      "lastModified": "2026-02-03T04:08:39.514Z"
-    },
-    {
-      "name": "REPORTE-AVANCE-TECNICO-COMPLETO.md",
-      "path": "C:\\Users\\tamvo\\OneDrive\\aqui\\Datos adjuntos\\tamv\\REPORTE-AVANCE-TECNICO-COMPLETO.md",
-      "size": 15902,
-      "lastModified": "2026-02-03T04:08:39.552Z"
-    },
-    {
-      "name": "RESUMEN-EJECUTIVO-FINAL.md",
-      "path": "C:\\Users\\tamvo\\OneDrive\\aqui\\Datos adjuntos\\tamv\\RESUMEN-EJECUTIVO-FINAL.md",
-      "size": 6472,
-      "lastModified": "2026-02-03T00:34:39.521Z"
-    },
-    {
-      "name": "ROADMAP-7-DIAS.md",
-      "path": "C:\\Users\\tamvo\\OneDrive\\aqui\\Datos adjuntos\\tamv\\ROADMAP-7-DIAS.md",
-      "size": 7521,
-      "lastModified": "2026-02-03T00:35:17.795Z"
-    },
-    {
-      "name": "SAAS-BUILDER-SETUP-COMPLETE.md",
-      "path": "C:\\Users\\tamvo\\OneDrive\\aqui\\Datos adjuntos\\tamv\\SAAS-BUILDER-SETUP-COMPLETE.md",
-      "size": 3409,
-      "lastModified": "2026-02-02T21:34:10.012Z"
+      "path": "/workspace/147f3f2b-e11b-49fe-a956-4869a4d4133f/sessions/agent_bf947826-9fa0-4193-9e42-3392bec8eb3c/README.md",
+      "size": 53736,
+      "lastModified": "2026-02-13T05:03:10.429Z"
     },
     {
       "name": "TAMV-DEPLOYMENT-PREREQUISITES.md",
-      "path": "C:\\Users\\tamvo\\OneDrive\\aqui\\Datos adjuntos\\tamv\\TAMV-DEPLOYMENT-PREREQUISITES.md",
-      "size": 7298,
-      "lastModified": "2026-02-02T19:00:05.654Z"
-    },
-    {
-      "name": "TAMV-DREAMWORLD-V1-IMPLEMENTACION-COMPLETA.md",
-      "path": "C:\\Users\\tamvo\\OneDrive\\aqui\\Datos adjuntos\\tamv\\TAMV-DREAMWORLD-V1-IMPLEMENTACION-COMPLETA.md",
-      "size": 10727,
-      "lastModified": "2026-02-02T19:21:37.571Z"
-    },
-    {
-      "name": "TAMV-FRONTEND-BACKEND-COMPLETO.md",
-      "path": "C:\\Users\\tamvo\\OneDrive\\aqui\\Datos adjuntos\\tamv\\TAMV-FRONTEND-BACKEND-COMPLETO.md",
-      "size": 10249,
-      "lastModified": "2026-02-02T22:16:28.021Z"
+      "path": "/workspace/147f3f2b-e11b-49fe-a956-4869a4d4133f/sessions/agent_bf947826-9fa0-4193-9e42-3392bec8eb3c/TAMV-DEPLOYMENT-PREREQUISITES.md",
+      "size": 7026,
+      "lastModified": "2026-02-13T05:03:10.429Z"
     },
     {
       "name": "TAMV-MASTER-DOCUMENTATION.md",
-      "path": "C:\\Users\\tamvo\\OneDrive\\aqui\\Datos adjuntos\\tamv\\TAMV-MASTER-DOCUMENTATION.md",
-      "size": 22857,
-      "lastModified": "2026-02-02T19:02:49.803Z"
+      "path": "/workspace/147f3f2b-e11b-49fe-a956-4869a4d4133f/sessions/agent_bf947826-9fa0-4193-9e42-3392bec8eb3c/TAMV-MASTER-DOCUMENTATION.md",
+      "size": 22203,
+      "lastModified": "2026-02-13T05:03:10.429Z"
     }
   ],
-  "emptyDirectories": [
-    "backend\\middleware",
-    "backend\\routes",
-    "CORE\\governance",
-    "CORE\\infra",
-    "tamv-enhanced-complete-bundle\\docs",
-    "tamv-enhanced-complete-bundle\\frontend",
-    "tamv-enhanced-complete-bundle\\infra",
-    "tamv-enhanced-complete-bundle\\scripts",
-    "tamv-enhanced-complete-bundle\\services",
-    "tamv-enhanced-complete-bundle\\tests"
-  ],
+  "emptyDirectories": [],
   "summary": {
-    "totalDuplicateFolders": 4,
-    "totalDuplicateFiles": 23,
-    "totalEmptyDirectories": 10,
-    "estimatedSpaceSavings": 1477445
+    "totalDuplicateFolders": 0,
+    "totalDuplicateFiles": 3,
+    "totalEmptyDirectories": 0,
+    "estimatedSpaceSavings": 82965
   }
 }
