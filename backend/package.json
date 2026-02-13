@@ -29,7 +29,11 @@
     "cookie-parser": "^1.4.6",
     "csurf": "^1.11.0",
     "isomorphic-dompurify": "^2.9.0",
-    "dotenv": "^16.3.1"
+    "dotenv": "^16.3.1",
+    "qiskit": "^0.1.0",
+    "quantum-js": "^1.0.0",
+    "tensorflow": "^0.0.1",
+    "numpy": "^0.0.1"
   },
   "devDependencies": {
     "@types/express": "^4.17.21",

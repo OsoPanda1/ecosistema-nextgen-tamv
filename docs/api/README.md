@@ -98,3 +98,4 @@ For detailed documentation of each endpoint, see:
 - [Authentication Endpoints](./auth.md)
 - [User Management Endpoints](./users.md)
 - [Social Wall Endpoints](./posts.md)
+- [Quantum Computing Endpoints](./quantum.md)

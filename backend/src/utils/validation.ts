@@ -59,6 +59,97 @@ export const paginationSchema = z.object({
   limit: z.string().regex(/^\d+$/).transform(Number).optional(),
 });
 
+// Quantum computing validation schemas
+export const createCircuitSchema = z.object({
+  qubits: z.number().min(1).max(20),
+});
+
+export const addGateSchema = z.object({
+  type: z.enum(['hadamard', 'pauli-x', 'pauli-y', 'pauli-z', 'cnot', 'swap', 'phase']),
+  targetQubits: z.array(z.number()).min(1),
+  parameters: z.array(z.number()).optional(),
+});
+
+export const executeCircuitSchema = z.object({
+  shots: z.number().min(1).max(10000).optional(),
+});
+
+export const quantumProcessingSchema = z.object({
+  data: z.any(),
+});
+
+export const quantumEncryptionSchema = z.object({
+  data: z.string(),
+});
+
+export const quantumMLSchema = z.object({
+  input: z.any(),
+});
+
+// Quantum protocol validation schemas
+export const protocolCommandSchema = z.object({
+  command: z.object({
+    id: z.string().uuid().optional(),
+    protocolId: z.string().min(1),
+    action: z.string().min(1),
+    payload: z.any(),
+    timestamp: z.string().optional(),
+  }),
+  context: z.object({
+    actorId: z.string().optional(),
+    timestamp: z.string().optional(),
+    layer: z.number().optional(),
+  }),
+});
+
+export const governanceProposalSchema = z.object({
+  proposal: z.any(),
+  context: z.object({
+    actorId: z.string().optional(),
+    timestamp: z.string().optional(),
+    layer: z.number().optional(),
+  }),
+});
+
+export const protocolSimulationSchema = z.object({
+  command: z.object({
+    id: z.string().uuid().optional(),
+    protocolId: z.string().min(1),
+    action: z.string().min(1),
+    payload: z.any(),
+    timestamp: z.string().optional(),
+  }),
+  context: z.object({
+    actorId: z.string().optional(),
+    timestamp: z.string().optional(),
+    layer: z.number().optional(),
+  }),
+});
+
+export const protocolOptimizationSchema = z.object({
+  command: z.object({
+    id: z.string().uuid().optional(),
+    protocolId: z.string().min(1),
+    action: z.string().min(1),
+    payload: z.any(),
+    timestamp: z.string().optional(),
+  }),
+  context: z.object({
+    actorId: z.string().optional(),
+    timestamp: z.string().optional(),
+    layer: z.number().optional(),
+  }),
+});
+
+export const protocolMonitoringSchema = z.object({
+  protocolId: z.string().min(1),
+  context: z.object({
+    actorId: z.string().optional(),
+    timestamp: z.string().optional(),
+    layer: z.number().optional(),
+  }),
+});
+
 // UUID validation schema
 export const uuidSchema = z.object({
   id: z.string().uuid('Invalid ID format'),
