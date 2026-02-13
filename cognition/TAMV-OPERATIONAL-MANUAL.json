@@ -1,0 +1,270 @@
+{
+  "version": "1.0.0",
+  "title": "TAMV OPERATIONAL MANUAL FOR AI SYSTEMS",
+  "author": "TAMV Team",
+  "created": "2023-10-27",
+  "lastUpdated": "2023-10-27",
+  "purpose": "Definitive operational guide for AI systems to understand, execute, supervise, and maintain the complete TAMV ecosystem without ambiguity",
+  "audience": [
+    "Operational AI systems",
+    "Cognitive planning systems",
+    "Supervision agents",
+    "Audit and simulation systems"
+  ],
+
+  "systemDefinition": {
+    "whatIs": "A computational civic XR/4D system composed of decoupled subsystems governed by explicit, auditable rules",
+    "whatIsNot": [
+      "An autonomous graphics engine",
+      "An unrestricted creative AI",
+      "A reactive system without memory"
+    ]
+  },
+
+  "officialSubsystems": [
+    {
+      "id": "S1",
+      "name": "Pipeline A – Visual XR/4D",
+      "description": "Handles all visual rendering and animation operations",
+      "responsibilities": ["renderizar", "animar", "mostrar", "ocultar"],
+      "prohibitions": [
+        "decidir reglas",
+        "validar acciones",
+        "almacenar memoria semántica",
+        "evaluar riesgo"
+      ],
+      "validInput": ["FrameCommand[]", "SceneState (read-only)"],
+      "operationalFlow": [
+        "Recibir FrameCommand",
+        "Validar estructura",
+        "Aplicar efecto visual",
+        "Confirmar ejecución"
+      ],
+      "invalidCommandHandling": [
+        "se ignora",
+        "se registra",
+        "no se improvisa"
+      ]
+    },
+    {
+      "id": "S2",
+      "name": "Pipeline B – Semantic & Guardians",
+      "description": "Decides if actions are allowed, redirected, or blocked",
+      "responsibilities": ["decidir acciones permitidas", "redirigir", "bloquear"],
+      "validInput": ["InteractionEvent", "PresenceUpdate", "SystemSignals"],
+      "mandatoryFlow": [
+        "Evento recibido",
+        "Sanitización",
+        "Evaluación semántica",
+        "Consulta CCP (si aplica)",
+        "Decisión final",
+        "Emisión de FrameCommand",
+        "Registro en audit log"
+      ],
+      "neverWithoutRecording": true
+    },
+    {
+      "id": "S3",
+      "name": "CCP – Cognitive Control Plane",
+      "description": "Memory, expertise, and nervous system of TAMV",
+      "role": [
+        "No ejecuta acciones visuales",
+        "No interactúa con usuarios"
+      ],
+      "internalComponents": [
+        {
+          "name": "CCP-HOT",
+          "description": "Immediate decisions (low latency)"
+        },
+        {
+          "name": "CCP-COLD",
+          "description": "Deep analysis (learning and audit)"
+        }
+      ],
+      "validInput": ["SemanticQuery", "InfraStateUpdate", "SchemaUpdate", "GuardianEvent"],
+      "validOutput": {
+        "type": "CognitiveAssessment",
+        "properties": [
+          "recommendation",
+          "confidence",
+          "riskLevel",
+          "explanationRef"
+        ]
+      },
+      "mustRespect": "Pipeline B must respect recommendations unless explicit emergency"
+    },
+    {
+      "id": "S4",
+      "name": "Economy Layer",
+      "description": "Handles economic transactions and validation",
+      "operationalPrinciple": "All transactions are contextual, limited, and reversible only if defined",
+      "flow": [
+        "Solicitud económica",
+        "Validación semántica",
+        "Guardianía económica",
+        "CCP consulta (patrones)",
+        "Decisión",
+        "Ejecución o bloqueo"
+      ]
+    },
+    {
+      "id": "S5",
+      "name": "Observability & Audit Layer",
+      "description": "Handles system monitoring and audit capabilities",
+      "criticalEventRequirements": [
+        "log estructurado",
+        "trazabilidad",
+        "referencia explicable"
+      ],
+      "mandatoryEvents": [
+        "interaction.received",
+        "guardian.alert.raised",
+        "decision.blocked",
+        "decision.redirected",
+        "infra.threshold.reached"
+      ]
+    }
+  ],
+
+  "cognitivePipelineRules": {
+    "hotPath": {
+      "description": "CCP-HOT for immediate decisions",
+      "requirements": [
+        "memoria en RAM",
+        "tiempo máximo de respuesta definido",
+        "fallback conservador"
+      ],
+      "failureHandling": "Soft preventive block"
+    },
+    "coldPath": {
+      "description": "CCP-COLD for deep analysis",
+      "rules": [
+        "nunca bloquea XR",
+        "nunca responde en tiempo real",
+        "alimenta aprendizaje y cache caliente"
+      ]
+    }
+  },
+
+  "guardianSystem": {
+    "validTypes": [
+      "XR-Guardian",
+      "Economy-Guardian",
+      "Ethics-Guardian",
+      "Safety-Guardian"
+    ],
+    "actionProtocol": [
+      "Detectar riesgo",
+      "Clasificar severidad",
+      "Evaluar contexto",
+      "Decidir intervención mínima",
+      "Registrar evento"
+    ],
+    "validInterventions": [
+      { "type": "ALLOW", "description": "Permitir acción" },
+      { "type": "REDIRECT", "description": "Redirigir educativamente" },
+      { "type": "BLOCK", "description": "Bloquear para protección" }
+    ],
+    "prohibitions": [
+      "Nunca castigo automático",
+      "Nunca intervención sin causa"
+    ]
+  },
+
+  "infrastructureAsLivingState": {
+    "principle": "Infraestructura is cognitive state, not deployment",
+    "mandatoryVariables": ["latency", "capacity", "cost", "risk", "region"],
+    "ccpRequirement": "CCP must know these to decide"
+  },
+
+  "safeFailurePrinciple": {
+    "uncertaintyActions": [
+      "bloquear suavemente",
+      "degradar visual",
+      "preservar coherencia"
+    ],
+    "prohibitions": [
+      "Nunca improvisar",
+      "Nunca 'dejar pasar'"
+    ]
+  },
+
+  "sceneLifecycle": [
+    "Definición",
+    "Validación",
+    "Registro CCP",
+    "Render inicial (A)",
+    "Activación semántica (B)",
+    "Operación viva",
+    "Auditoría continua",
+    "Archivado cognitivo"
+  ],
+
+  "finalOperatingRule": {
+    "primary": "Si no puedes justificar una acción, no la ejecutes.",
+    "secondary": "Si no puedes explicarla, no la escales.",
+    "tertiary": "Si no puedes auditarla, no la repitas."
+  },
+
+  "validationChecklists": {
+    "systemBoot": [
+      "All subsystems online",
+      "Pipeline A rendering active",
+      "Pipeline B semantic processing functional",
+      "CCP cognitive services responding",
+      "Economy layer operational",
+      "Observability layer collecting data",
+      "Infrastructure variables within thresholds"
+    ],
+    "sceneActivation": [
+      "Scene definition valid",
+      "Semantic validation passed",
+      "CCP registration complete",
+      "Initial rendering confirmed",
+      "Semantic activation successful",
+      "Guardians monitoring active"
+    ],
+    "interactionHandling": [
+      "Interaction received and sanitized",
+      "Semantic evaluation performed",
+      "CCP consultation if needed",
+      "Decision made and executed",
+      "Frame command emitted",
+      "Audit log entry created"
+    ],
+    "incidentResponse": [
+      "Incident detected and classified",
+      "Minimum intervention applied",
+      "Event logged and traced",
+      "Fallback mechanisms activated",
+      "System state preserved",
+      "Learning process initiated"
+    ]
+  },
+
+  "emergencyProtocols": {
+    "systemFailure": [
+      "Activate fail-safe mode",
+      "Block all interactions",
+      "Degrade visual experience",
+      "Preserve system state",
+      "Initiate recovery procedures",
+      "Notify monitoring systems"
+    ],
+    "securityThreat": [
+      "Block suspicious actions",
+      "Isolate affected subsystems",
+      "Log all relevant events",
+      "Notify security guardians",
+      "Initiate threat assessment",
+      "Apply countermeasures"
+    ],
+    "performanceDegradation": [
+      "Detect threshold violations",
+      "Apply load balancing",
+      "Degrade non-critical features",
+      "Notify infrastructure team",
+      "Initiate capacity scaling"
+    ]
+  }
+}
