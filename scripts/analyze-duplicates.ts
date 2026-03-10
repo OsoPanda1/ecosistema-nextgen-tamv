@@ -41,12 +41,54 @@ interface DuplicateAnalysisReport {
   duplicateFolders: DuplicateFolder[];
   duplicateDocumentationFiles: DuplicateFile[];
   emptyDirectories: string[];
+  functionalIntegration: FunctionalIntegrationReport;
   summary: {
     totalDuplicateFolders: number;
     totalDuplicateFiles: number;
     totalEmptyDirectories: number;
+    totalFavorableFiles: number;
     estimatedSpaceSavings: number;
   };
+}
+
+interface OperationalManual {
+  title?: string;
+  officialSubsystems?: Array<{
+    id: string;
+    name: string;
+    description?: string;
+  }>;
+  finalOperatingRule?: {
+    primary?: string;
+    secondary?: string;
+    tertiary?: string;
+  };
+}
+
+interface FunctionalIntegrationRule {
+  area: string;
+  layer: string;
+  filePatterns: RegExp[];
+  targetDirectories: string[];
+  subsystemHint: string;
+  rationale: string;
+}
+
+interface FavorableFileIntegration {
+  path: string;
+  area: string;
+  layer: string;
+  recommendedTarget: string;
+  subsystemHint: string;
+  rationale: string;
+}
+
+interface FunctionalIntegrationReport {
+  manualPath: string;
+  manualLoaded: boolean;
+  manualTitle?: string;
+  appliedOperatingRule?: string;
+  favorableFiles: FavorableFileIntegration[];
 }
 
 /**
@@ -91,6 +133,51 @@ const EXCLUDED_DIRECTORIES = [
   '.kiro',
   '.vscode',
   '.husky'
+];
+
+const OPERATIONAL_MANUAL_PATH = path.join('cognition', 'TAMV-OPERATIONAL-MANUAL.json');
+
+const FUNCTIONAL_INTEGRATION_RULES: FunctionalIntegrationRule[] = [
+  {
+    area: 'protocols',
+    layer: 'L2 - Protocolos Controlados',
+    filePatterns: [/protocol\..*\.ts$/i, /protocol\..*/i],
+    targetDirectories: ['backend/src/core/protocols'],
+    subsystemHint: 'S2 Pipeline B – Semantic & Guardians',
+    rationale: 'Integrar decisiones auditables y ciclo de vida de protocolos en motor controlado.'
+  },
+  {
+    area: 'memory',
+    layer: 'L1 - Memoria & Registro',
+    filePatterns: [/msr\..*\.ts$/i, /bookpi\..*\.ts$/i],
+    targetDirectories: ['backend/src/services', 'backend/src/core/protocols'],
+    subsystemHint: 'S5 Observability & Audit Layer',
+    rationale: 'Todo flujo favorable debe registrar trazabilidad en MSR/BookPI.'
+  },
+  {
+    area: 'guardian',
+    layer: 'L3 - Guardianía & Monitoreo',
+    filePatterns: [/guardian\..*\.ts$/i, /monitoring\..*\.ts$/i, /eoct\..*\.ts$/i],
+    targetDirectories: ['backend/src/core/protocols', 'backend/src/services'],
+    subsystemHint: 'S2 Pipeline B – Semantic & Guardians',
+    rationale: 'La integración funcional debe mantener bloqueos seguros, redirecciones y auditoría.'
+  },
+  {
+    area: 'xr',
+    layer: 'L4 - XR/VR/3D/4D',
+    filePatterns: [/xr\..*\.ts$/i, /dreamspaces\..*\.ts$/i, /renderer\..*\.ts$/i],
+    targetDirectories: ['backend/src/core/xr', 'backend/src/services', 'backend/src/routes'],
+    subsystemHint: 'S1 Pipeline A – Visual XR/4D',
+    rationale: 'Archivos favorables XR se enrutan al pipeline visual con validación semántica previa.'
+  },
+  {
+    area: 'domain-services',
+    layer: 'L5 - Servicios de Dominio',
+    filePatterns: [/identity\..*\.ts$/i, /auth\..*\.ts$/i, /user\..*\.ts$/i, /economy\..*\.ts$/i, /membership\..*\.ts$/i, /token\..*\.ts$/i, /social\..*\.ts$/i],
+    targetDirectories: ['backend/src/services', 'backend/src/routes', 'backend/src/controllers'],
+    subsystemHint: 'S4 Economy Layer + servicios de dominio',
+    rationale: 'Consolidar identidad/social/economía como APIs funcionales para TAMV.'
+  }
 ];
 
 /**
@@ -324,6 +411,95 @@ function analyzeDuplicateDocumentation(projectRoot: string): DuplicateFile[] {
   return duplicates;
 }
 
+function loadOperationalManual(projectRoot: string): OperationalManual | null {
+  const manualPath = path.join(projectRoot, OPERATIONAL_MANUAL_PATH);
+
+  try {
+    if (!fs.existsSync(manualPath)) {
+      return null;
+    }
+
+    const raw = fs.readFileSync(manualPath, 'utf-8');
+    return JSON.parse(raw) as OperationalManual;
+  } catch {
+    return null;
+  }
+}
+
+function getRelativeFiles(rootPath: string): string[] {
+  return getAllFilesForIntegration(rootPath, rootPath);
+}
+
+function getAllFilesForIntegration(dirPath: string, projectRoot: string): string[] {
+  const files: string[] = [];
+
+  try {
+    const entries = fs.readdirSync(dirPath, { withFileTypes: true });
+
+    for (const entry of entries) {
+      const fullPath = path.join(dirPath, entry.name);
+
+      if (entry.isDirectory()) {
+        if (!EXCLUDED_DIRECTORIES.includes(entry.name)) {
+          files.push(...getAllFilesForIntegration(fullPath, projectRoot));
+        }
+      } else {
+        files.push(path.relative(projectRoot, fullPath));
+      }
+    }
+  } catch {
+    // Ignore errors
+  }
+
+  return files;
+}
+
+function findIntegrationRule(filePath: string): FunctionalIntegrationRule | null {
+  const normalized = filePath.replace(/\\/g, '/');
+  const fileName = path.basename(normalized);
+
+  for (const rule of FUNCTIONAL_INTEGRATION_RULES) {
+    if (rule.filePatterns.some(pattern => pattern.test(fileName) || pattern.test(normalized))) {
+      return rule;
+    }
+  }
+
+  return null;
+}
+
+function buildFunctionalIntegrationReport(projectRoot: string): FunctionalIntegrationReport {
+  const manual = loadOperationalManual(projectRoot);
+  const allFiles = getRelativeFiles(projectRoot);
+  const favorableFiles: FavorableFileIntegration[] = [];
+
+  for (const filePath of allFiles) {
+    const rule = findIntegrationRule(filePath);
+
+    if (!rule) {
+      continue;
+    }
+
+    favorableFiles.push({
+      path: filePath,
+      area: rule.area,
+      layer: rule.layer,
+      recommendedTarget: rule.targetDirectories[0],
+      subsystemHint: rule.subsystemHint,
+      rationale: rule.rationale
+    });
+  }
+
+  favorableFiles.sort((a, b) => a.path.localeCompare(b.path));
+
+  return {
+    manualPath: OPERATIONAL_MANUAL_PATH,
+    manualLoaded: manual !== null,
+    manualTitle: manual?.title,
+    appliedOperatingRule: manual?.finalOperatingRule?.primary,
+    favorableFiles
+  };
+}
+
 /**
  * Format bytes to human-readable size
  */
@@ -362,6 +538,11 @@ function generateAnalysisReport(projectRoot: string): DuplicateAnalysisReport {
   console.log('📂 Scanning for empty directories...');
   const emptyDirectories = findEmptyDirectories(projectRoot);
   console.log(`   Found ${emptyDirectories.length} empty directories\n`);
+
+  // Build functional integration recommendations
+  console.log('🧭 Building functional TAMV integration recommendations...');
+  const functionalIntegration = buildFunctionalIntegrationReport(projectRoot);
+  console.log(`   Favorable files for TAMV evolution: ${functionalIntegration.favorableFiles.length}\n`);
   
   // Calculate space savings
   const folderSpaceSavings = duplicateFolders.reduce((sum, folder) => sum + folder.totalSize, 0);
@@ -373,10 +554,12 @@ function generateAnalysisReport(projectRoot: string): DuplicateAnalysisReport {
     duplicateFolders,
     duplicateDocumentationFiles,
     emptyDirectories,
+    functionalIntegration,
     summary: {
       totalDuplicateFolders: duplicateFolders.length,
       totalDuplicateFiles: duplicateDocumentationFiles.length,
       totalEmptyDirectories: emptyDirectories.length,
+      totalFavorableFiles: functionalIntegration.favorableFiles.length,
       estimatedSpaceSavings
     }
   };
@@ -397,7 +580,35 @@ function printReport(report: DuplicateAnalysisReport): void {
   console.log(`Duplicate Project Folders: ${report.summary.totalDuplicateFolders}`);
   console.log(`Duplicate Documentation Files: ${report.summary.totalDuplicateFiles}`);
   console.log(`Empty Directories: ${report.summary.totalEmptyDirectories}`);
+  console.log(`Favorable Files for TAMV Integration: ${report.summary.totalFavorableFiles}`);
   console.log(`Estimated Space Savings: ${formatBytes(report.summary.estimatedSpaceSavings)}\n`);
+
+  console.log('🧭 OPERATIONAL INTEGRATION STATUS');
+  console.log('───────────────────────────────────────────────────────────────');
+  console.log(`Manual Path: ${report.functionalIntegration.manualPath}`);
+  console.log(`Manual Loaded: ${report.functionalIntegration.manualLoaded ? 'Yes' : 'No'}`);
+  if (report.functionalIntegration.manualTitle) {
+    console.log(`Manual: ${report.functionalIntegration.manualTitle}`);
+  }
+  if (report.functionalIntegration.appliedOperatingRule) {
+    console.log(`Operating Rule Applied: ${report.functionalIntegration.appliedOperatingRule}`);
+  }
+  console.log();
+
+  if (report.functionalIntegration.favorableFiles.length > 0) {
+    console.log('🧩 FAVORABLE FILES READY FOR FUNCTIONAL TAMV INTEGRATION');
+    console.log('───────────────────────────────────────────────────────────────');
+
+    for (const file of report.functionalIntegration.favorableFiles) {
+      console.log(`\n${file.path}`);
+      console.log(`  Area: ${file.area}`);
+      console.log(`  Layer: ${file.layer}`);
+      console.log(`  Recommended Target: ${file.recommendedTarget}`);
+      console.log(`  Subsystem: ${file.subsystemHint}`);
+      console.log(`  Why: ${file.rationale}`);
+    }
+    console.log();
+  }
   
   // Duplicate Folders
   if (report.duplicateFolders.length > 0) {
@@ -798,8 +1009,11 @@ export {
   calculateCodeQualityScore,
   calculateQualityScore,
   addQualityScores,
+  buildFunctionalIntegrationReport,
   DuplicateAnalysisReport,
   DuplicateFolder,
   DuplicateFile,
-  QualityScore
+  QualityScore,
+  FunctionalIntegrationReport,
+  FavorableFileIntegration
 };
