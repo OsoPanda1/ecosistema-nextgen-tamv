@@ -29,7 +29,7 @@ export async function executeQuantumProtocolHandler(
 
     // Add user information to context
     context.actorId = req.user?.id || 'anonymous';
-    context.timestamp = new Date().toISOString();
+    context.metadata = { ...(context.metadata || {}), timestamp: new Date().toISOString() };
 
     const result = await executeQuantumProtocolCommand(command, context);
     res.json(result);
@@ -57,7 +57,7 @@ export async function quantumGovernanceDecisionHandler(
 
     // Add user information to context
     context.actorId = req.user?.id || 'anonymous';
-    context.timestamp = new Date().toISOString();
+    context.metadata = { ...(context.metadata || {}), timestamp: new Date().toISOString() };
 
     const result = await quantumGovernanceDecision(proposal, context);
     res.json(result);
@@ -85,7 +85,7 @@ export async function simulateQuantumProtocolHandler(
 
     // Add user information to context
     context.actorId = req.user?.id || 'anonymous';
-    context.timestamp = new Date().toISOString();
+    context.metadata = { ...(context.metadata || {}), timestamp: new Date().toISOString() };
 
     const result = await simulateQuantumProtocol(command, context);
     res.json(result);
@@ -113,7 +113,7 @@ export async function optimizeProtocolQuantumHandler(
 
     // Add user information to context
     context.actorId = req.user?.id || 'anonymous';
-    context.timestamp = new Date().toISOString();
+    context.metadata = { ...(context.metadata || {}), timestamp: new Date().toISOString() };
 
     const result = await optimizeProtocolQuantum(command, context);
     res.json(result);
@@ -141,7 +141,7 @@ export async function monitorProtocolQuantumHandler(
 
     // Add user information to context
     context.actorId = req.user?.id || 'anonymous';
-    context.timestamp = new Date().toISOString();
+    context.metadata = { ...(context.metadata || {}), timestamp: new Date().toISOString() };
 
     const result = await monitorProtocolQuantum(protocolId, context);
     res.json(result);

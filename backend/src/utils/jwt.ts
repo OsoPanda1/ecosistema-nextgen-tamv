@@ -10,6 +10,7 @@ const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || '15m';
 const REFRESH_TOKEN_EXPIRES_IN = process.env.REFRESH_TOKEN_EXPIRES_IN || '7d';
 
 export interface TokenPayload {
+  id?: string;
   userId: string;
   email: string;
   role: string;
@@ -20,7 +21,7 @@ export interface TokenPayload {
  */
 export function generateAccessToken(payload: TokenPayload): string {
   return jwt.sign(payload, JWT_SECRET, {
-    expiresIn: JWT_EXPIRES_IN,
+    expiresIn: JWT_EXPIRES_IN as jwt.SignOptions['expiresIn'],
   });
 }
 
@@ -29,7 +30,7 @@ export function generateAccessToken(payload: TokenPayload): string {
  */
 export function generateRefreshToken(payload: TokenPayload): string {
   return jwt.sign(payload, JWT_SECRET, {
-    expiresIn: REFRESH_TOKEN_EXPIRES_IN,
+    expiresIn: REFRESH_TOKEN_EXPIRES_IN as jwt.SignOptions['expiresIn'],
   });
 }
 
