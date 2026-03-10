@@ -5,14 +5,34 @@
 import { Request, Response, NextFunction } from 'express';
 import * as economyService from '../services/economy.service';
 
+function getAuthorizedUserId(req: Request, requestedUserId?: string): string | null {
+  const authenticatedUserId = req.user?.userId;
+  if (!authenticatedUserId) {
+    return null;
+  }
+
+  const isAdmin = req.user?.role === 'admin';
+  if (isAdmin) {
+    return requestedUserId || authenticatedUserId;
+  }
+
+  return authenticatedUserId;
+}
+
 export async function createLedgerEntryHandler(
   req: Request,
   res: Response,
   next: NextFunction
 ): Promise<void> {
   try {
+    const userId = getAuthorizedUserId(req, req.body.userId);
+    if (!userId) {
+      res.status(401).json({ error: 'Authentication required' });
+      return;
+    }
+
     const entry = await economyService.createLedgerEntry({
-      userId: req.body.userId,
+      userId,
       amount: req.body.amount,
       currency: req.body.currency,
       entryType: req.body.entryType,
@@ -49,8 +69,14 @@ export async function upsertTokenBalanceHandler(
   next: NextFunction
 ): Promise<void> {
   try {
+    const userId = getAuthorizedUserId(req, req.body.userId);
+    if (!userId) {
+      res.status(401).json({ error: 'Authentication required' });
+      return;
+    }
+
     const balance = await economyService.upsertTokenBalance({
-      userId: req.body.userId,
+      userId,
       tokenType: req.body.tokenType,
       balance: req.body.balance,
     });
@@ -84,8 +110,14 @@ export async function createMembershipHandler(
   next: NextFunction
 ): Promise<void> {
   try {
+    const userId = getAuthorizedUserId(req, req.body.userId);
+    if (!userId) {
+      res.status(401).json({ error: 'Authentication required' });
+      return;
+    }
+
     const membership = await economyService.createMembership({
-      userId: req.body.userId,
+      userId,
       tier: req.body.tier,
       status: req.body.status,
       endsAt: req.body.endsAt,

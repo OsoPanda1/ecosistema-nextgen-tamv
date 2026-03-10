@@ -12,7 +12,7 @@ export async function executeProtocolHandler(
   next: NextFunction
 ): Promise<void> {
   try {
-    const actorId = req.user?.id;
+    const actorId = req.user?.userId;
     if (!actorId) {
       res.status(401).json({ error: 'Authentication required' });
       return;
