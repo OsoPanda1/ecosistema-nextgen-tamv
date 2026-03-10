@@ -11,7 +11,7 @@ export async function createDreamspaceHandler(
   next: NextFunction
 ): Promise<void> {
   try {
-    const ownerId = req.user?.id;
+    const ownerId = req.user?.userId;
     if (!ownerId) {
       res.status(401).json({ error: 'Authentication required' });
       return;

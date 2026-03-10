@@ -5,14 +5,34 @@
 import { Request, Response, NextFunction } from 'express';
 import * as economyService from '../services/economy.service';
 
+function resolveTargetUserId(req: Request, res: Response): string | null {
+  const requesterId = req.user?.userId;
+  if (!requesterId) {
+    res.status(401).json({ error: 'Authentication required' });
+    return null;
+  }
+
+  const requestedUserId = req.body.userId as string | undefined;
+
+  if (requestedUserId && requestedUserId !== requesterId && req.user?.role !== 'admin') {
+    res.status(403).json({ error: 'You can only modify your own economy records' });
+    return null;
+  }
+
+  return requestedUserId || requesterId;
+}
+
 export async function createLedgerEntryHandler(
   req: Request,
   res: Response,
   next: NextFunction
 ): Promise<void> {
   try {
+    const userId = resolveTargetUserId(req, res);
+    if (!userId) return;
+
     const entry = await economyService.createLedgerEntry({
-      userId: req.body.userId,
+      userId,
       amount: req.body.amount,
       currency: req.body.currency,
       entryType: req.body.entryType,
@@ -49,8 +69,11 @@ export async function upsertTokenBalanceHandler(
   next: NextFunction
 ): Promise<void> {
   try {
+    const userId = resolveTargetUserId(req, res);
+    if (!userId) return;
+
     const balance = await economyService.upsertTokenBalance({
-      userId: req.body.userId,
+      userId,
       tokenType: req.body.tokenType,
       balance: req.body.balance,
     });
@@ -84,8 +107,11 @@ export async function createMembershipHandler(
   next: NextFunction
 ): Promise<void> {
   try {
+    const userId = resolveTargetUserId(req, res);
+    if (!userId) return;
+
     const membership = await economyService.createMembership({
-      userId: req.body.userId,
+      userId,
       tier: req.body.tier,
       status: req.body.status,
       endsAt: req.body.endsAt,
