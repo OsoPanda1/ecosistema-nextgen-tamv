@@ -94,7 +94,31 @@ CREATE TABLE IF NOT EXISTS xr_events (
   actor_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
   event_type VARCHAR(100) NOT NULL,
   payload JSONB DEFAULT '{}'::jsonb,
+  session_id UUID,
   created_at TIMESTAMP DEFAULT NOW()
+);
+
+-- XR sessions table
+CREATE TABLE IF NOT EXISTS xr_sessions (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  actor_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  session_type VARCHAR(50) NOT NULL DEFAULT 'standard',
+  status VARCHAR(20) NOT NULL DEFAULT 'active',
+  current_scene_id UUID,
+  metadata JSONB DEFAULT '{}'::jsonb,
+  created_at TIMESTAMP DEFAULT NOW(),
+  updated_at TIMESTAMP DEFAULT NOW()
+);
+
+-- XR scenes table
+CREATE TABLE IF NOT EXISTS xr_scenes (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  name VARCHAR(255) NOT NULL,
+  type VARCHAR(100) NOT NULL,
+  description TEXT,
+  initial_payload JSONB DEFAULT '{}'::jsonb,
+  created_at TIMESTAMP DEFAULT NOW(),
+  updated_at TIMESTAMP DEFAULT NOW()
 );
 
 -- DreamSpaces table
@@ -151,6 +175,10 @@ CREATE INDEX IF NOT EXISTS idx_bookpi_entries_created_at ON bookpi_entries(creat
 CREATE INDEX IF NOT EXISTS idx_eoct_evaluations_actor_id ON eoct_evaluations(actor_id);
 CREATE INDEX IF NOT EXISTS idx_isabella_decisions_actor_id ON isabella_decisions(actor_id);
 CREATE INDEX IF NOT EXISTS idx_xr_events_actor_id ON xr_events(actor_id);
+CREATE INDEX IF NOT EXISTS idx_xr_events_session_id ON xr_events(session_id);
+CREATE INDEX IF NOT EXISTS idx_xr_sessions_actor_id ON xr_sessions(actor_id);
+CREATE INDEX IF NOT EXISTS idx_xr_sessions_status ON xr_sessions(status);
+CREATE INDEX IF NOT EXISTS idx_xr_scenes_type ON xr_scenes(type);
 CREATE INDEX IF NOT EXISTS idx_dreamspaces_owner_id ON dreamspaces(owner_id);
 CREATE INDEX IF NOT EXISTS idx_economy_ledger_user_id ON economy_ledger(user_id);
 CREATE INDEX IF NOT EXISTS idx_token_balances_user_id ON token_balances(user_id);

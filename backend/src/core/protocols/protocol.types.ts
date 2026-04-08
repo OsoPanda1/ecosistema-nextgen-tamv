@@ -28,7 +28,9 @@ export interface ProtocolContext {
   actorId: string;
   layer: 'L0' | 'L1' | 'L2' | 'L3' | 'L4' | 'L5' | 'L6' | 'L7';
   purpose: string;
-  metadata?: Record<string, unknown>;
+  metadata?: Record<string, unknown> & {
+    timestamp?: string;
+  };
 }
 
 export interface ProtocolCommand {
@@ -65,8 +67,11 @@ export interface GuardianEvent {
 }
 
 export interface XRSceneUpdate {
+  [key: string]: unknown;
   sceneId: string;
   mood: 'calm' | 'alert' | 'critical';
   overlays: string[];
   updatedAt: string;
+  quantumEnhanced?: boolean;
+  quantumScore?: number;
 }
