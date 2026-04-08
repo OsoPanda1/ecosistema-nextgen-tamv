@@ -11,7 +11,7 @@ import * as economyController from '../controllers/economy.controller';
 const router = Router();
 
 const ledgerSchema = z.object({
-  userId: z.string().uuid(),
+  userId: z.string().uuid().optional(),
   amount: z.number(),
   currency: z.string().min(2),
   entryType: z.enum(['credit', 'debit', 'reward', 'fee']),
@@ -20,13 +20,13 @@ const ledgerSchema = z.object({
 });
 
 const tokenSchema = z.object({
-  userId: z.string().uuid(),
+  userId: z.string().uuid().optional(),
   tokenType: z.string().min(2),
   balance: z.number(),
 });
 
 const membershipSchema = z.object({
-  userId: z.string().uuid(),
+  userId: z.string().uuid().optional(),
   tier: z.enum(['free', 'creator', 'guardian', 'institutional']),
   status: z.enum(['active', 'paused', 'expired']),
   endsAt: z.string().optional(),
