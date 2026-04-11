@@ -196,7 +196,7 @@ export async function getGlobalFeed(
 ): Promise<{ data: PostWithUser[]; total: number; page: number; limit: number }> {
   const offset = (page - 1) * limit;
 
-  const countResult = await query<{ count: string }>(
+  const countResult = await pool.query<{ count: string }>(
     `SELECT COUNT(*) as count FROM posts p
      WHERE p.deleted_at IS NULL AND p.visibility = 'public'`
   );
