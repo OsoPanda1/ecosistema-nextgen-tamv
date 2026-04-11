@@ -92,8 +92,8 @@ export async function upsertTokenBalanceHandler(
       return;
     }
 
-    if (requesterRole !== 'admin' && req.body.userId !== requesterId) {
-      res.status(403).json({ error: 'Insufficient permissions' });
+    if (requesterRole !== 'admin') {
+      res.status(403).json({ error: 'Only admins can modify token balances' });
       return;
     }
 
