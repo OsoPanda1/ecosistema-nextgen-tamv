@@ -136,7 +136,7 @@ CREATE TABLE IF NOT EXISTS dreamspace_permissions (
 -- Economy ledger table
 CREATE TABLE IF NOT EXISTS economy_ledger (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  user_id UUID NOT NULL REFERENCES users(id) ON DELETE RESTRICT,
   amount NUMERIC(18, 4) NOT NULL,
   currency VARCHAR(20) NOT NULL,
   entry_type VARCHAR(20) NOT NULL,
