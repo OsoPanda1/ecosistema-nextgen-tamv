@@ -282,8 +282,8 @@ export async function getGlobalFeedHandler(
   next: NextFunction
 ): Promise<void> {
   try {
-    const page = parseInt(req.query.page as string) || 1;
-    const limit = parseInt(req.query.limit as string) || 20;
+    const page = Math.max(1, Number.parseInt(req.query.page as string, 10) || 1);
+    const limit = Math.min(100, Math.max(1, Number.parseInt(req.query.limit as string, 10) || 20));
 
     const result = await postService.getGlobalFeed(page, limit);
 
