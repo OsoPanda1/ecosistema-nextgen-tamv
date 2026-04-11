@@ -158,7 +158,7 @@ export async function createMembershipHandler(
       return;
     }
 
-    if (requesterRole !== 'admin' && req.body.userId !== requesterId) {
+    if (requesterRole !== 'admin') {
       res.status(403).json({ error: 'Insufficient permissions' });
       return;
     }
