@@ -5,18 +5,21 @@
 import { Request, Response, NextFunction } from 'express';
 import * as economyService from '../services/economy.service';
 
-function getAuthorizedUserId(req: Request, requestedUserId?: string): string | null {
-  const authenticatedUserId = req.user?.userId;
-  if (!authenticatedUserId) {
+function resolveTargetUserId(req: Request, res: Response): string | null {
+  const requesterId = req.user?.userId;
+  if (!requesterId) {
+    res.status(401).json({ error: 'Authentication required' });
     return null;
   }
 
-  const isAdmin = req.user?.role === 'admin';
-  if (isAdmin) {
-    return requestedUserId || authenticatedUserId;
+  const requestedUserId = req.body.userId as string | undefined;
+
+  if (requestedUserId && requestedUserId !== requesterId && req.user?.role !== 'admin') {
+    res.status(403).json({ error: 'You can only modify your own economy records' });
+    return null;
   }
 
-  return authenticatedUserId;
+  return requestedUserId || requesterId;
 }
 
 export async function createLedgerEntryHandler(
@@ -25,11 +28,8 @@ export async function createLedgerEntryHandler(
   next: NextFunction
 ): Promise<void> {
   try {
-    const userId = getAuthorizedUserId(req, req.body.userId);
-    if (!userId) {
-      res.status(401).json({ error: 'Authentication required' });
-      return;
-    }
+    const userId = resolveTargetUserId(req, res);
+    if (!userId) return;
 
     const entry = await economyService.createLedgerEntry({
       userId,
@@ -69,11 +69,8 @@ export async function upsertTokenBalanceHandler(
   next: NextFunction
 ): Promise<void> {
   try {
-    const userId = getAuthorizedUserId(req, req.body.userId);
-    if (!userId) {
-      res.status(401).json({ error: 'Authentication required' });
-      return;
-    }
+    const userId = resolveTargetUserId(req, res);
+    if (!userId) return;
 
     const balance = await economyService.upsertTokenBalance({
       userId,
@@ -110,11 +107,8 @@ export async function createMembershipHandler(
   next: NextFunction
 ): Promise<void> {
   try {
-    const userId = getAuthorizedUserId(req, req.body.userId);
-    if (!userId) {
-      res.status(401).json({ error: 'Authentication required' });
-      return;
-    }
+    const userId = resolveTargetUserId(req, res);
+    if (!userId) return;
 
     const membership = await economyService.createMembership({
       userId,
