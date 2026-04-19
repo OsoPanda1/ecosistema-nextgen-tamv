@@ -24,6 +24,7 @@ import isabellaRoutes from './routes/isabella.routes';
 import xrRoutes from './routes/xr.routes';
 import dreamspacesRoutes from './routes/dreamspaces.routes';
 import economyRoutes from './routes/economy.routes';
+import geolocationRoutes from './routes/geolocation.routes';
 import quantumRoutes from './routes/quantum.routes';
 import quantumProtocolRoutes from './routes/quantum-protocol.routes';
 
@@ -71,6 +72,7 @@ app.use('/api/v1/isabella', isabellaRoutes);
 app.use('/api/v1/xr', xrRoutes);
 app.use('/api/v1/dreamspaces', dreamspacesRoutes);
 app.use('/api/v1/economy', economyRoutes);
+app.use('/api/v1/geolocation', geolocationRoutes);
 app.use('/api/v1/quantum', quantumRoutes);
 app.use('/api/v1/quantum-protocol', quantumProtocolRoutes);
 
