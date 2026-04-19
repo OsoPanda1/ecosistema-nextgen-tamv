@@ -14,6 +14,8 @@ export type XRGatewayMessageType =
   | 'scene_loaded'
   | 'scene_enhanced'
   | 'event_received'
+  | 'geolocation_ingested'
+  | 'place_registered'
   | 'error';
 
 export interface XRGatewayMessage {
