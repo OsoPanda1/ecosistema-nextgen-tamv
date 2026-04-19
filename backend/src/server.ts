@@ -24,6 +24,8 @@ import isabellaRoutes from './routes/isabella.routes';
 import xrRoutes from './routes/xr.routes';
 import dreamspacesRoutes from './routes/dreamspaces.routes';
 import economyRoutes from './routes/economy.routes';
+import quantumRoutes from './routes/quantum.routes';
+import quantumProtocolRoutes from './routes/quantum-protocol.routes';
 
 // Middleware
 import { errorHandler, notFoundHandler } from './middleware/error.middleware';
@@ -69,6 +71,8 @@ app.use('/api/v1/isabella', isabellaRoutes);
 app.use('/api/v1/xr', xrRoutes);
 app.use('/api/v1/dreamspaces', dreamspacesRoutes);
 app.use('/api/v1/economy', economyRoutes);
+app.use('/api/v1/quantum', quantumRoutes);
+app.use('/api/v1/quantum-protocol', quantumProtocolRoutes);
 
 // 404 handler
 app.use(notFoundHandler);
