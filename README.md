@@ -303,15 +303,10 @@ UTAMV funciona como **núcleo académico** del ecosistema NextGen TAMV y como es
 
 ***
 
-Aquí está el **Módulo 3**, donde concentro **arquitectura técnica, MD‑X4, 7 capas, seguridad TENOCHTITLAN, XR, Isabella, cuántico, blockchain, despliegue y métricas**, reordenando tu contenido pero sin perder nada importante. [ppl-ai-file-upload.s3.amazonaws](https://ppl-ai-file-upload.s3.amazonaws.com/web/direct-files/attachments/128365973/a440a7cb-3a9d-43d1-8630-2259b5281dc1/paste.txt)
-
-***
-
 ## 🏗️ 7. Arquitectura técnica y MD‑X4
 
 ### 7.1 Stack tecnológico principal
 
-```yaml
 # Tecnologías Core
 quantum_computing:
   - IBM Qiskit
