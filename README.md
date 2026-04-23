@@ -4,7 +4,6 @@
 
 ## MÓDULO 1 · Portada, Arquitecto Raíz y Visión
 
-```markdown
 <div align="center">
 
   <!-- BANNER PRINCIPAL TAMV -->
@@ -143,10 +142,6 @@ Edwin Oswaldo Castillo Trejo, orgullosamente realmonten­se, es el único respon
 ## 🌟 5. Descripción total del ecosistema
 
 TAMV es una **arquitectura civilizatoria antifrágil y federada** que va mucho más allá de un metaverso clásico: se plantea como un sistema de soberanía digital, protección de memoria y generación de valor ético para comunidades vulnerables.[file:77][web:41] Es, al mismo tiempo, plataforma social, universidad, infraestructura financiera, motor XR y escudo jurídico‑técnico para quienes históricamente han sido marginados de la revolución tecnológica.[file:77][web:1]
-
-```
-
-Aquí va el **Módulo 2** del `README.md` fusionado, centrado en todos los **servicios del ecosistema** con lenguaje unificado y sin perder nada de lo que ya definiste en DreamWorld. [ppl-ai-file-upload.s3.amazonaws](https://ppl-ai-file-upload.s3.amazonaws.com/web/direct-files/attachments/128365973/a440a7cb-3a9d-43d1-8630-2259b5281dc1/paste.txt)
 
 ***
 
