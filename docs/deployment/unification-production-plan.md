@@ -114,6 +114,29 @@ Each subsystem must have a defined API surface, deployment unit, and configurati
 3. **Confirm canonical commands** in `README.md`.
 4. **Finalize deployment scripts** and a single deploy guide.
 
+### RDM external repository intake (federated)
+
+To support a same-day deployment path for Real del Monte Digital, this repo now includes a federated intake automation for these sources:
+
+- `real-del-monte-elevated`
+- `rdm-smart-city-os`
+- `citemesh-roots`
+- `real-del-monte-explorer`
+- `real-del-monte-twin`
+- `RDM-DIGITAL2026`
+- `RDM-Digital-X`
+- `RDM-DIGITAL`
+- `plataforma-real-del-monte`
+
+Execution flow:
+
+1. Place external repositories as siblings of this repo, or define `RDM_REPOS_ROOT=/absolute/path/to/repos`.
+2. Run `npm run integrate:rdm` for dry-run style discovery and reporting.
+3. Run `npm run integrate:rdm -- --execute` to copy discovered files into `integration/rdm-federation/` using non-destructive sync rules.
+4. Review `integration/rdm-integration-report.json` and only then continue with deployment hardening.
+
+This intake is intentionally additive (no source deletion) and preserves traceability through a persisted report.
+
 ## 6) Known Limitations
 
 - This plan reflects **only** the current repository contents. External GitHub repositories or profile data were not accessible from the local workspace, so the unification strategy assumes this repository is the designated canonical home.

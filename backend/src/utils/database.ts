@@ -4,13 +4,13 @@
  */
 
 import pool from '../config/database';
-import { PoolClient, QueryResult } from 'pg';
+import { PoolClient, QueryResult, QueryResultRow } from 'pg';
 
 /**
  * Execute a parameterized query
  * Prevents SQL injection by using prepared statements
  */
-export async function query<T = any>(
+export async function query<T extends QueryResultRow = QueryResultRow>(
   text: string,
   params?: any[]
 ): Promise<QueryResult<T>> {
@@ -50,7 +50,7 @@ export async function transaction<T>(
 /**
  * Get a single row by ID
  */
-export async function getById<T = any>(
+export async function getById<T extends QueryResultRow = QueryResultRow>(
   table: string,
   id: string
 ): Promise<T | null> {
@@ -64,7 +64,7 @@ export async function getById<T = any>(
 /**
  * Get paginated results
  */
-export async function paginate<T = any>(
+export async function paginate<T extends QueryResultRow = QueryResultRow>(
   table: string,
   page: number = 1,
   limit: number = 20,

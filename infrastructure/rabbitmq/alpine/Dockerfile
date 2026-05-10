@@ -1,0 +1,249 @@
+# syntax=docker/dockerfile:1
+# check=skip=SecretsUsedInArgOrEnv
+#
+# NOTE: THIS DOCKERFILE IS GENERATED VIA "apply-templates.sh"
+#
+# PLEASE DO NOT EDIT IT DIRECTLY.
+#
+
+# vim:noet:
+# Alpine Linux is not officially supported by the RabbitMQ team -- use at your own risk!
+FROM alpine:3.23 AS build-base
+
+RUN apk add --no-cache \
+	build-base \
+	dpkg-dev \
+	dpkg \
+	gnupg \
+	libc-dev \
+	linux-headers \
+	ncurses-dev
+
+FROM build-base AS openssl-builder
+
+ARG BUILDKIT_SBOM_SCAN_STAGE=true
+
+ARG PGP_KEYSERVER=keyserver.ubuntu.com
+
+ENV OPENSSL_VERSION=3.5.5
+ENV OPENSSL_SOURCE_SHA256="b28c91532a8b65a1f983b4c28b7488174e4a01008e29ce8e69bd789f28bc2a89"
+ENV OPENSSL_PGP_KEY_IDS="0xBA5473A2B0587B07FB27CF2D216094DFD0CB81EF"
+
+ENV OTP_VERSION=27.3.4.8
+ENV OTP_SOURCE_SHA256="354243af8095a5e567931490b7b0ffe7b22cf12ee49b65c36e9187501ca03e8e"
+
+ENV ERLANG_INSTALL_PATH_PREFIX=/opt/erlang
+ENV OPENSSL_INSTALL_PATH_PREFIX=/opt/openssl
+
+RUN set -eux; \
+	mkdir -p /usr/local/src; \
+	OPENSSL_SOURCE_URL="https://github.com/openssl/openssl/releases/download/openssl-$OPENSSL_VERSION/openssl-$OPENSSL_VERSION.tar.gz"; \
+	OPENSSL_PATH="/usr/local/src/openssl-$OPENSSL_VERSION"; \
+	OPENSSL_CONFIG_DIR="$OPENSSL_INSTALL_PATH_PREFIX/etc/ssl"; \
+	wget --output-document "$OPENSSL_PATH.tar.gz.asc" "$OPENSSL_SOURCE_URL.asc"; \
+	wget --output-document "$OPENSSL_PATH.tar.gz" "$OPENSSL_SOURCE_URL"; \
+	export GNUPGHOME="$(mktemp -d)"; \
+	for key in $OPENSSL_PGP_KEY_IDS; do \
+		gpg --batch --keyserver "$PGP_KEYSERVER" --recv-keys "$key"; \
+	done; \
+	gpg --batch --verify "$OPENSSL_PATH.tar.gz.asc" "$OPENSSL_PATH.tar.gz"; \
+	gpgconf --kill all; \
+	rm -rf "$GNUPGHOME"; \
+	echo "$OPENSSL_SOURCE_SHA256 *$OPENSSL_PATH.tar.gz" | sha256sum -c -; \
+	mkdir -p "$OPENSSL_PATH"; \
+	tar --extract --file "$OPENSSL_PATH.tar.gz" --directory "$OPENSSL_PATH" --strip-components 1; \
+	cd "$OPENSSL_PATH"; \
+	apkArch="$(apk --print-arch)"; \
+	case "$apkArch" in \
+		aarch64) opensslMachine='linux-aarch64' ;; \
+		armhf) opensslMachine='linux-armv4'; opensslExtraConfig='-march=armv6+fp' ;; \
+		armv7) opensslMachine='linux-armv4'; opensslExtraConfig='-march=armv7-a+fp' ;; \
+		ppc64le) opensslMachine='linux-ppc64le' ;; \
+		riscv64) opensslMachine='linux64-riscv64' ;; \
+		s390x) opensslMachine='linux64-s390x' ;; \
+		x86) opensslMachine='linux-x86' ;; \
+		x86_64) opensslMachine='linux-x86_64' ;; \
+		*) echo >&2 "error: unsupported arch: '$apkArch'"; exit 1 ;; \
+	esac; \
+	MACHINE="$opensslMachine" \
+	RELEASE="4.x.y-z" \
+	SYSTEM='Linux' \
+	BUILD='???' \
+	./Configure \
+		"$opensslMachine" \
+		enable-fips \
+		--prefix="$OPENSSL_INSTALL_PATH_PREFIX" \
+		--openssldir="$OPENSSL_CONFIG_DIR" \
+		--libdir="$OPENSSL_INSTALL_PATH_PREFIX/lib" \
+		-Wl,-rpath="$OPENSSL_INSTALL_PATH_PREFIX/lib" \
+		${opensslExtraConfig:-} \
+	; \
+	make -j "$(getconf _NPROCESSORS_ONLN)"; \
+	make install_sw install_ssldirs install_fips; \
+	rmdir "$OPENSSL_CONFIG_DIR/certs" "$OPENSSL_CONFIG_DIR/private"; \
+	ln -sf /etc/ssl/certs /etc/ssl/private "$OPENSSL_CONFIG_DIR"
+
+RUN $OPENSSL_INSTALL_PATH_PREFIX/bin/openssl version
+
+FROM openssl-builder AS erlang-builder
+
+ARG BUILDKIT_SBOM_SCAN_STAGE=true
+
+RUN set -eux; \
+	mkdir -p /usr/local/src; \
+	OTP_SOURCE_URL="https://github.com/erlang/otp/releases/download/OTP-$OTP_VERSION/otp_src_$OTP_VERSION.tar.gz"; \
+	OTP_PATH="/usr/local/src/otp-$OTP_VERSION"; \
+	mkdir -p "$OTP_PATH"; \
+	wget --output-document "$OTP_PATH.tar.gz" "$OTP_SOURCE_URL"; \
+	echo "$OTP_SOURCE_SHA256 *$OTP_PATH.tar.gz" | sha256sum -c -; \
+	tar --extract --file "$OTP_PATH.tar.gz" --directory "$OTP_PATH" --strip-components 1; \
+	cd "$OTP_PATH"; \
+	export ERL_TOP="$OTP_PATH"; \
+	export CFLAGS='-g -O2'; \
+	export CFLAGS="$CFLAGS -Wl,-rpath=$OPENSSL_INSTALL_PATH_PREFIX/lib"; \
+	hostArch="$(dpkg-architecture --query DEB_HOST_GNU_TYPE)"; \
+	buildArch="$(dpkg-architecture --query DEB_BUILD_GNU_TYPE)"; \
+	dpkgArch="$(dpkg --print-architecture)"; dpkgArch="${dpkgArch##*-}"; \
+	jitFlag=; \
+	case "$dpkgArch" in \
+		amd64 | arm64) jitFlag='--enable-jit' ;; \
+	esac; \
+	./configure \
+		--prefix="$ERLANG_INSTALL_PATH_PREFIX" \
+		--host="$hostArch" \
+		--build="$buildArch" \
+		--disable-hipe \
+		--disable-sctp \
+		--disable-silent-rules \
+		--enable-builtin-zlib \
+		--enable-clock-gettime \
+		--enable-hybrid-heap \
+		--enable-kernel-poll \
+		--enable-smp-support \
+		--enable-threads \
+		--with-microstate-accounting=extra \
+		--with-ssl="$OPENSSL_INSTALL_PATH_PREFIX" \
+		--without-common_test \
+		--without-debugger \
+		--without-dialyzer \
+		--without-diameter \
+		--without-edoc \
+		--without-erl_docgen \
+		--without-et \
+		--without-eunit \
+		--without-ftp \
+		--without-hipe \
+		--without-jinterface \
+		--without-megaco \
+		--without-observer \
+		--without-odbc \
+		--without-reltool \
+		--without-snmp \
+		--without-ssh \
+		--without-tftp \
+		--without-wx \
+		$jitFlag \
+	; \
+	make -j "$(getconf _NPROCESSORS_ONLN)" GEN_OPT_FLGS="-O2 -fno-strict-aliasing"; \
+	make install; \
+	find "$ERLANG_INSTALL_PATH_PREFIX/lib/erlang" -type d -name examples -exec rm -rf '{}' +; \
+	find "$ERLANG_INSTALL_PATH_PREFIX/lib/erlang" -type d -name src -exec rm -rf '{}' +; \
+	find "$ERLANG_INSTALL_PATH_PREFIX/lib/erlang" -type d -name include -exec rm -rf '{}' +
+
+ENV PATH=$ERLANG_INSTALL_PATH_PREFIX/bin:$PATH
+RUN find $ERLANG_INSTALL_PATH_PREFIX -type f -name 'crypto.so' -exec ldd {} \; | awk '/libcrypto\.so/ { if (!index($3,ENVIRON["OPENSSL_INSTALL_PATH_PREFIX"])) exit 1 }'
+RUN erl -noshell -eval 'ok = crypto:start(), ok = io:format("~p~n~n~p~n~n", [crypto:supports(), ssl:versions()]), init:stop().'
+
+FROM alpine:3.23
+
+ENV ERLANG_INSTALL_PATH_PREFIX=/opt/erlang
+ENV OPENSSL_INSTALL_PATH_PREFIX=/opt/openssl
+
+COPY --from=erlang-builder $ERLANG_INSTALL_PATH_PREFIX $ERLANG_INSTALL_PATH_PREFIX
+COPY --from=openssl-builder $OPENSSL_INSTALL_PATH_PREFIX $OPENSSL_INSTALL_PATH_PREFIX
+
+ENV PATH=$ERLANG_INSTALL_PATH_PREFIX/bin:$OPENSSL_INSTALL_PATH_PREFIX/bin:$PATH
+
+ENV RABBITMQ_DATA_DIR=/var/lib/rabbitmq
+
+RUN set -eux; \
+	ln -vsf /etc/ssl/certs /etc/ssl/private "$OPENSSL_INSTALL_PATH_PREFIX/etc/ssl"; \
+	runDeps="$( \
+		scanelf --needed --nobanner --format '%n#p' --recursive $ERLANG_INSTALL_PATH_PREFIX $OPENSSL_INSTALL_PATH_PREFIX \
+			| tr ',' '\n' \
+			| sort -u \
+			| grep -v '^$\|lib\(crypto\|ssl\)' \
+			| awk 'system("test -e /usr/local/lib/" $1) == 0 { next } { print "so:" $1 }' \
+	)"; \
+	apk add --no-cache --virtual .otp-run-deps $runDeps; \
+	sed -i.ORIG -e "/\.include.*fips/ s!.*!.include $OPENSSL_INSTALL_PATH_PREFIX/etc/ssl/fipsmodule.cnf!" \
+		-e '/# fips =/s/.*/fips = fips_sect/' "$OPENSSL_INSTALL_PATH_PREFIX/etc/ssl/openssl.cnf"; \
+	sed -i.ORIG -e '/^activate/s/^/#/' "$OPENSSL_INSTALL_PATH_PREFIX/etc/ssl/fipsmodule.cnf"; \
+	[ "$(command -v openssl)" = "$OPENSSL_INSTALL_PATH_PREFIX/bin/openssl" ]; \
+	openssl version; \
+	openssl version -d; \
+	erl -noshell -eval 'ok = crypto:start(), ok = io:format("~p~n~n~p~n~n", [crypto:supports(), ssl:versions()]), init:stop().'; \
+	addgroup -g 101 -S rabbitmq; \
+	adduser -u 100 -S -h "$RABBITMQ_DATA_DIR" -G rabbitmq rabbitmq; \
+	mkdir -p "$RABBITMQ_DATA_DIR" /etc/rabbitmq /etc/rabbitmq/conf.d /tmp/rabbitmq-ssl /var/log/rabbitmq; \
+	chown -fR rabbitmq:rabbitmq "$RABBITMQ_DATA_DIR" /etc/rabbitmq /etc/rabbitmq/conf.d /tmp/rabbitmq-ssl /var/log/rabbitmq; \
+	chmod 1777 "$RABBITMQ_DATA_DIR" /etc/rabbitmq /etc/rabbitmq/conf.d /tmp/rabbitmq-ssl /var/log/rabbitmq; \
+	ln -sf "$RABBITMQ_DATA_DIR/.erlang.cookie" /root/.erlang.cookie; \
+	apk add --no-cache \
+		'su-exec>=0.2' \
+		bash \
+		procps \
+		tzdata
+
+ENV RABBITMQ_VERSION=4.2.4
+ENV RABBITMQ_PGP_KEY_ID=0x0A9AF2115F4687BD29803A206B73A36E6026DFCA
+ENV RABBITMQ_HOME=/opt/rabbitmq
+
+ENV PATH=$RABBITMQ_HOME/sbin:$PATH
+
+RUN set -eux; \
+	mkdir -p /usr/local/src; \
+	apk add --no-cache --virtual .build-deps \
+		gnupg \
+		xz \
+	; \
+	RABBITMQ_SOURCE_URL="https://github.com/rabbitmq/rabbitmq-server/releases/download/v$RABBITMQ_VERSION/rabbitmq-server-generic-unix-latest-toolchain-$RABBITMQ_VERSION.tar.xz"; \
+	RABBITMQ_PATH="/usr/local/src/rabbitmq-$RABBITMQ_VERSION"; \
+	wget --output-document "$RABBITMQ_PATH.tar.xz.asc" "$RABBITMQ_SOURCE_URL.asc"; \
+	wget --output-document "$RABBITMQ_PATH.tar.xz" "$RABBITMQ_SOURCE_URL"; \
+	export GNUPGHOME="$(mktemp -d)"; \
+	gpg --batch --keyserver hkps://keys.openpgp.org --recv-keys "$RABBITMQ_PGP_KEY_ID"; \
+	gpg --batch --verify "$RABBITMQ_PATH.tar.xz.asc" "$RABBITMQ_PATH.tar.xz"; \
+	gpgconf --kill all; \
+	rm -rf "$GNUPGHOME"; \
+	mkdir -p "$RABBITMQ_HOME"; \
+	tar --extract --file "$RABBITMQ_PATH.tar.xz" --directory "$RABBITMQ_HOME" --strip-components 1; \
+	rm -rf "$RABBITMQ_PATH"*; \
+	grep -qE '^SYS_PREFIX=\$\{RABBITMQ_HOME\}$' "$RABBITMQ_HOME/sbin/rabbitmq-defaults"; \
+	sed -i 's/^SYS_PREFIX=.*$/SYS_PREFIX=/' "$RABBITMQ_HOME/sbin/rabbitmq-defaults"; \
+	grep -qE '^SYS_PREFIX=$' "$RABBITMQ_HOME/sbin/rabbitmq-defaults"; \
+	chown -R rabbitmq:rabbitmq "$RABBITMQ_HOME"; \
+	apk del --no-network .build-deps; \
+	[ ! -e "$RABBITMQ_DATA_DIR/.erlang.cookie" ]; \
+	su-exec rabbitmq rabbitmqctl help; \
+	su-exec rabbitmq rabbitmqctl list_ciphers; \
+	su-exec rabbitmq rabbitmq-plugins list; \
+	rm "$RABBITMQ_DATA_DIR/.erlang.cookie"
+
+RUN su-exec rabbitmq rabbitmq-plugins enable --offline rabbitmq_prometheus
+
+RUN ln -sf /opt/rabbitmq/plugins /plugins
+
+ENV HOME=$RABBITMQ_DATA_DIR
+VOLUME $RABBITMQ_DATA_DIR
+
+ENV LANG=C.UTF-8 LANGUAGE=C.UTF-8 LC_ALL=C.UTF-8
+
+ENV RUNNING_UNDER_SYSTEMD=true
+
+COPY --chown=rabbitmq:rabbitmq 10-defaults.conf 20-management_agent.disable_metrics_collector.conf /etc/rabbitmq/conf.d/
+COPY docker-entrypoint.sh /usr/local/bin/
+ENTRYPOINT ["docker-entrypoint.sh"]
+
+EXPOSE 4369 5671 5672 15691 15692 25672
+CMD ["rabbitmq-server"]

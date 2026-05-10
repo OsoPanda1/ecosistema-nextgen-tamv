@@ -1,0 +1,67 @@
+{
+  "repositories": [
+    {
+      "name": "real-del-monte-elevated",
+      "layer": "L4",
+      "pathCandidates": ["../real-del-monte-elevated", "./real-del-monte-elevated"],
+      "targetSubdirectory": "xr/real-del-monte-elevated",
+      "description": "Assets and logic for elevated XR experience."
+    },
+    {
+      "name": "rdm-smart-city-os",
+      "layer": "L2",
+      "pathCandidates": ["../rdm-smart-city-os", "./rdm-smart-city-os"],
+      "targetSubdirectory": "protocols/rdm-smart-city-os",
+      "description": "Smart-city orchestration and protocol logic."
+    },
+    {
+      "name": "citemesh-roots",
+      "layer": "L1",
+      "pathCandidates": ["../citemesh-roots", "./citemesh-roots"],
+      "targetSubdirectory": "memory/citemesh-roots",
+      "description": "Foundational city-memory and semantic root structures."
+    },
+    {
+      "name": "real-del-monte-explorer",
+      "layer": "L6",
+      "pathCandidates": ["../real-del-monte-explorer", "./real-del-monte-explorer"],
+      "targetSubdirectory": "shell/real-del-monte-explorer",
+      "description": "Explorer UX and journey flows."
+    },
+    {
+      "name": "real-del-monte-twin",
+      "layer": "L4",
+      "pathCandidates": ["../real-del-monte-twin", "./real-del-monte-twin"],
+      "targetSubdirectory": "xr/real-del-monte-twin",
+      "description": "Digital twin scene data and real-time synchronization logic."
+    },
+    {
+      "name": "RDM-DIGITAL2026",
+      "layer": "L7",
+      "pathCandidates": ["../RDM-DIGITAL2026", "./RDM-DIGITAL2026"],
+      "targetSubdirectory": "quantum/rdm-digital2026",
+      "description": "Roadmap and orchestration patterns for 2026 deployment."
+    },
+    {
+      "name": "RDM-Digital-X",
+      "layer": "L3",
+      "pathCandidates": ["../RDM-Digital-X", "./RDM-Digital-X"],
+      "targetSubdirectory": "guardian/rdm-digital-x",
+      "description": "Monitoring and guardian intelligence components."
+    },
+    {
+      "name": "RDM-DIGITAL",
+      "layer": "L5",
+      "pathCandidates": ["../RDM-DIGITAL", "./RDM-DIGITAL"],
+      "targetSubdirectory": "domain/rdm-digital",
+      "description": "Domain services for economy, social and identity."
+    },
+    {
+      "name": "plataforma-real-del-monte",
+      "layer": "L6",
+      "pathCandidates": ["../plataforma-real-del-monte", "./plataforma-real-del-monte"],
+      "targetSubdirectory": "shell/plataforma-real-del-monte",
+      "description": "Platform shell and integration UI."
+    }
+  ]
+}

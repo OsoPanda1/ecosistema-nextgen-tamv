@@ -17,7 +17,8 @@ import {
   calculateRecencyScore,
   calculateCodeQualityScore,
   calculateQualityScore,
-  addQualityScores
+  addQualityScores,
+  buildFunctionalIntegrationReport
 } from '../../scripts/analyze-duplicates';
 
 describe('File System Analyzer', () => {
@@ -276,7 +277,12 @@ describe('File System Analyzer', () => {
       expect(report.summary.totalDuplicateFolders).toBe(1);
       expect(report.summary.totalDuplicateFiles).toBeGreaterThan(0);
       expect(report.summary.totalEmptyDirectories).toBeGreaterThan(0);
+      expect(report.summary.totalFavorableFiles).toBeGreaterThanOrEqual(0);
       expect(report.summary.estimatedSpaceSavings).toBeGreaterThan(0);
+
+      expect(report).toHaveProperty('functionalIntegration');
+      expect(typeof report.functionalIntegration.manualLoaded).toBe('boolean');
+      expect(Array.isArray(report.functionalIntegration.favorableFiles)).toBe(true);
     });
 
     it('should calculate space savings correctly', () => {
@@ -299,7 +305,47 @@ describe('File System Analyzer', () => {
 
       expect(report.summary.totalDuplicateFolders).toBe(0);
       expect(report.summary.totalDuplicateFiles).toBe(0);
+      expect(report.summary.totalFavorableFiles).toBe(0);
       expect(report.summary.estimatedSpaceSavings).toBe(0);
+    });
+  });
+
+  describe('Functional TAMV Integration', () => {
+    it('should categorize favorable files into TAMV functional layers', () => {
+      fs.mkdirSync(path.join(tempDir, 'backend'), { recursive: true });
+      fs.mkdirSync(path.join(tempDir, 'backend', 'src', 'core', 'protocols'), { recursive: true });
+      fs.mkdirSync(path.join(tempDir, 'backend', 'src', 'core', 'xr'), { recursive: true });
+      fs.mkdirSync(path.join(tempDir, 'backend', 'src', 'services'), { recursive: true });
+
+      fs.writeFileSync(path.join(tempDir, 'backend', 'src', 'core', 'protocols', 'protocol.engine.ts'), 'export const x = 1;');
+      fs.writeFileSync(path.join(tempDir, 'backend', 'src', 'core', 'xr', 'xr.gateway.ts'), 'export const y = 1;');
+      fs.writeFileSync(path.join(tempDir, 'backend', 'src', 'services', 'economy.service.ts'), 'export const z = 1;');
+
+      const result = buildFunctionalIntegrationReport(tempDir);
+
+      expect(result.favorableFiles.length).toBe(3);
+      expect(result.favorableFiles.map(f => f.area)).toEqual(
+        expect.arrayContaining(['protocols', 'xr', 'domain-services'])
+      );
+    });
+
+    it('should load TAMV operational manual when available', () => {
+      fs.mkdirSync(path.join(tempDir, 'cognition'), { recursive: true });
+      fs.writeFileSync(
+        path.join(tempDir, 'cognition', 'TAMV-OPERATIONAL-MANUAL.json'),
+        JSON.stringify({
+          title: 'Manual Test',
+          finalOperatingRule: {
+            primary: 'Si no puedes justificar una acción, no la ejecutes.'
+          }
+        })
+      );
+
+      const result = buildFunctionalIntegrationReport(tempDir);
+
+      expect(result.manualLoaded).toBe(true);
+      expect(result.manualTitle).toBe('Manual Test');
+      expect(result.appliedOperatingRule).toBe('Si no puedes justificar una acción, no la ejecutes.');
     });
   });
 

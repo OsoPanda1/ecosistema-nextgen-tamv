@@ -50,6 +50,12 @@ Authorization: Bearer <your-jwt-token>
 - `GET /posts/:id/comments` - Get post comments
 - `GET /feed` - Get personalized feed
 
+### Geolocation (RDM Digital)
+
+- `POST /geolocation/places/register` - Register business/stall/POI with verification score.
+- `POST /geolocation/telemetry/ingest` - Ingest real-time telemetry point (GPS/WiFi/Beacon/manual).
+- `GET /geolocation/places/nearby?lat=..&lng=..&radiusMeters=..` - Retrieve nearby businesses/stalls/POIs.
+
 ## Response Format
 
 All API responses follow this format:
@@ -99,3 +105,4 @@ For detailed documentation of each endpoint, see:
 - [User Management Endpoints](./users.md)
 - [Social Wall Endpoints](./posts.md)
 - [Quantum Computing Endpoints](./quantum.md)
+- [Geolocation Endpoints](./geolocation.md)
