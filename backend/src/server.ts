@@ -27,6 +27,7 @@ import economyRoutes from './routes/economy.routes';
 import geolocationRoutes from './routes/geolocation.routes';
 import quantumRoutes from './routes/quantum.routes';
 import quantumProtocolRoutes from './routes/quantum-protocol.routes';
+import tamvRoutes from './routes/tamv.routes';
 
 // Middleware
 import { errorHandler, notFoundHandler } from './middleware/error.middleware';
@@ -75,6 +76,7 @@ app.use('/api/v1/economy', economyRoutes);
 app.use('/api/v1/geolocation', geolocationRoutes);
 app.use('/api/v1/quantum', quantumRoutes);
 app.use('/api/v1/quantum-protocol', quantumProtocolRoutes);
+app.use('/api/v1/tamv', tamvRoutes);
 
 // 404 handler
 app.use(notFoundHandler);
