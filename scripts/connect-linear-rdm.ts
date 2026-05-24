@@ -43,6 +43,7 @@ function parseArgs(argv: string[], cwd: string): CliOptions {
     manifestPath,
     dryRun: argv.includes('--dry-run') || argv.includes('-d'),
     teamId: process.env.LINEAR_TEAM_ID
+    dryRun: argv.includes('--dry-run') || argv.includes('-d')
   };
 }
 
@@ -121,6 +122,10 @@ async function main(): Promise<void> {
 
   if (!options.dryRun && !teamId) {
     throw new Error('Falta LINEAR_TEAM_ID en variables de entorno para ejecución real.');
+  const teamId = process.env.LINEAR_TEAM_ID;
+
+  if (!teamId) {
+    throw new Error('Falta LINEAR_TEAM_ID en variables de entorno.');
   }
 
   console.log(`Repos detectados para conexión serial: ${repositories.length}`);
