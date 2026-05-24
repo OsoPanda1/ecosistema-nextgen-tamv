@@ -30,6 +30,7 @@ interface CreateIssueResult {
 interface CliOptions {
   manifestPath?: string;
   dryRun: boolean;
+  teamId?: string;
 }
 
 function parseArgs(argv: string[], cwd: string): CliOptions {
@@ -40,6 +41,8 @@ function parseArgs(argv: string[], cwd: string): CliOptions {
 
   return {
     manifestPath,
+    dryRun: argv.includes('--dry-run') || argv.includes('-d'),
+    teamId: process.env.LINEAR_TEAM_ID
     dryRun: argv.includes('--dry-run') || argv.includes('-d')
   };
 }
@@ -115,6 +118,10 @@ function buildIssue(repo: RdmRepoDefinition, previousRepo?: RdmRepoDefinition): 
 async function main(): Promise<void> {
   const options = parseArgs(process.argv.slice(2), process.cwd());
   const repositories = loadRepositories(options.manifestPath);
+  const teamId = options.teamId;
+
+  if (!options.dryRun && !teamId) {
+    throw new Error('Falta LINEAR_TEAM_ID en variables de entorno para ejecución real.');
   const teamId = process.env.LINEAR_TEAM_ID;
 
   if (!teamId) {
